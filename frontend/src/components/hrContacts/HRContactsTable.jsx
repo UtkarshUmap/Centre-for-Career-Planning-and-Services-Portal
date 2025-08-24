@@ -30,7 +30,7 @@ const HRContactsTable = ({ contacts, onView }) => {
                 <br />
                 {c.email}
               </td>
-              <td className="p-3">{c.assigned_to_user_id || "Unassigned"}</td>
+              <td className="p-3">{c.assigned_to_user_name || "Unassigned"}</td>
               <td className="p-3">
                 <StatusPill status={c.status} />
               </td>

@@ -65,12 +65,53 @@ const HRContactsPage = () => {
     setIsAddOpen(false);
   };
 
+
+
+
+//   const [searchTerm, setSearchTerm] = React.useState("");
+// const [statusFilter, setStatusFilter] = React.useState("");
+// const [assignmentFilter, setAssignmentFilter] = React.useState("");
+
+// const filteredContacts = contacts.filter(contact => {
+//   const matchesSearch =
+//     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//     contact.company.toLowerCase().includes(searchTerm.toLowerCase());
+
+//   const matchesStatus = statusFilter ? contact.status === statusFilter : true;
+
+//   const matchesAssignment = assignmentFilter
+//     ? assignmentFilter === "me"
+//       ? contact.assignedTo === "me"
+//       : assignmentFilter === "others"
+//       ? contact.assignedTo !== "me" && contact.assignedTo
+//       : contact.assignedTo === null
+//     : true;
+
+//   return matchesSearch && matchesStatus && matchesAssignment;
+// });
+
+
+
+
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="flex-1 p-6 pt-16 md:pt-8 w-full max-w-7xl mx-auto space-y-6">
         <HRContactsHeader total={contacts.length} onAdd={() => setIsAddOpen(true)} />
-        <FilterBar />
+        {/* <FilterBar
+  searchTerm={searchTerm}
+  setSearchTerm={setSearchTerm}
+  statusFilter={statusFilter}
+  setStatusFilter={setStatusFilter}
+  assignmentFilter={assignmentFilter}
+  setAssignmentFilter={setAssignmentFilter}
+/> */}
+
+<FilterBar/>
+
+{/* <HRContactsTable contacts={filteredContacts} onView={handleViewContact} /> */}
+
         <TableToolbar total={contacts.length} />
         <HRContactsTable contacts={contacts} onView={handleViewContact} />
 

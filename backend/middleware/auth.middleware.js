@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
 import pool from "../config/postgredb.js";
+import CallLog from "../models/callLog.model.js";
 
 config();
 
@@ -53,4 +54,29 @@ export const authorizeRoles = (...roles) => {
     }
     next();
   };
+};
+
+
+
+export const authorizeUpdateLog = async (req, res, next) => {
+  try {
+    const log = await CallLog.getLogById(req.params.id);
+    if (!log) return res.status(404).json({ success: false, message: "Log not found" });
+    const isAdmin = req.user.role === "admin";
+    const isOwner = req.user.user_id === log.caller_id;
+    const iseligibleOwner = req.user.user_id === log.caller_id && log.call_timestamp > Date.now() - 24*60*60*1000;
+
+    if( isAdmin || iseligibleOwner ){
+      next();
+    }
+    else if(isOwner){
+      return res.status(403).json({ success: false, message: "You can modify within only 24Hrs" });
+    }
+    else{
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+  } catch (error) {
+    console.error("Error in authorizeUpdateLog middleware: ", error.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };

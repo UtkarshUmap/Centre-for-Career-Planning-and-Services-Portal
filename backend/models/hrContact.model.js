@@ -46,17 +46,39 @@ export default {
     return result.rows[0];
   },
 
-  // READ all HR contacts
-  async getAllHRContacts() {
-    const result = await pool.query(`SELECT * FROM hr_contacts ORDER BY created_at DESC`);
-    return result.rows;
-  },
+  // READ all HR contacts (with added_by and assigned_to user names)
+async getAllHRContacts() {
+  const query = `
+    SELECT 
+      hc.*,
+      u1.full_name AS added_by_user_name,
+      u2.full_name AS assigned_to_user_name
+    FROM hr_contacts hc
+    LEFT JOIN users u1 ON hc.added_by_user_id = u1.user_id
+    LEFT JOIN users u2 ON hc.assigned_to_user_id = u2.user_id
+    ORDER BY hc.created_at DESC
+  `;
 
-  // READ one HR contact by ID
-  async getHRContactById(contact_id) {
-    const result = await pool.query(`SELECT * FROM hr_contacts WHERE contact_id = $1`, [contact_id]);
-    return result.rows[0];
-  },
+  const result = await pool.query(query);
+  return result.rows;
+},
+
+  // READ one HR contact by ID (with user names)
+async getHRContactById(contact_id) {
+  const query = `
+    SELECT 
+      hc.*,
+      u1.full_name AS added_by_user_name,
+      u2.full_name AS assigned_to_user_name
+    FROM hr_contacts hc
+    LEFT JOIN users u1 ON hc.added_by_user_id = u1.user_id
+    LEFT JOIN users u2 ON hc.assigned_to_user_id = u2.user_id
+    WHERE hc.contact_id = $1
+  `;
+
+  const result = await pool.query(query, [contact_id]);
+  return result.rows[0];
+},
 
   // UPDATE an HR contact by ID
   async updateHRContact(contact_id, contact) {

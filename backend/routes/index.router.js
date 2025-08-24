@@ -15,6 +15,7 @@ import profileRouter from "./profile.routes.js";
 import savedJobsRouter from "./savedJobs.route.js";
 
 import hrContactRoutes from "./hrContact.route.js";
+import callLogRoutes from "./callLog.routes.js";
 
 const router = express.Router();
 
@@ -33,5 +34,6 @@ router.use("/saved-jobs", savedJobsRouter);
 router.use("/profile", profileRouter);
 
 router.use("/hr-contacts", hrContactRoutes);
+router.use("/call-logs", callLogRoutes);
 
 export default router;
