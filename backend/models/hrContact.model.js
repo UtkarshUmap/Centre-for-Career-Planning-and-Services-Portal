@@ -3,48 +3,55 @@ import pool from '../config/postgredb.js'
 
 export default {
   // CREATE a new HR contact
-  async createHRContact(contact) {
-    const {
-      full_name,
-      company_id,
-      designation,
-      email,
-      phone_1,
-      phone_2,
-      linkedin_profile,
-      source,
-      status = 'active',
-      notes,
-      added_by_user_id,
-      assigned_to_user_id,
-      is_approved = false,
-    } = contact;
+async createHRContact(contact) {
+  const {
+    full_name,
+    company_id,
+    designation,
+    email,
+    phone_1,
+    phone_2,
+    linkedin_profile,
+    source,
+    status = 'active',
+    notes,
+    added_by_user_id,
+    assigned_to_user_id,
+    is_approved = false,
+  } = contact;
 
-    const result = await pool.query(
-      `INSERT INTO hr_contacts
+  const query = `
+    WITH inserted AS (
+      INSERT INTO hr_contacts
         (full_name, company_id, designation, email, phone_1, phone_2, linkedin_profile, source, status, notes, added_by_user_id, assigned_to_user_id, is_approved)
-       VALUES
+      VALUES
         ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-       RETURNING *`,
-      [
-        full_name,
-        company_id,
-        designation,
-        email,
-        phone_1,
-        phone_2,
-        linkedin_profile,
-        source,
-        status,
-        notes,
-        added_by_user_id,
-        assigned_to_user_id,
-        is_approved,
-      ]
-    );
+      RETURNING *
+    )
+    SELECT i.*, c.company_name
+    FROM inserted i
+    LEFT JOIN companies c ON i.company_id = c.company_id;
+  `;
 
-    return result.rows[0];
-  },
+  const values = [
+    full_name,
+    company_id,
+    designation,
+    email,
+    phone_1,
+    phone_2,
+    linkedin_profile,
+    source,
+    status,
+    notes,
+    added_by_user_id,
+    assigned_to_user_id,
+    is_approved,
+  ];
+
+  const result = await pool.query(query, values);
+  return result.rows[0];
+},
 
   // READ all HR contacts (with added_by and assigned_to user names)
 async getAllHRContacts() {

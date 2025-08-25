@@ -1,5 +1,6 @@
 import HRContact from '../models/hrContact.model.js';
 import { exportToCSV } from '../utils/exportCSV.js'; // Utility function for CSV export
+import { sendNewHRAddedEmail } from '../utils/emails.js';
 
 // CREATE a new HR contact
 export const createHRContact = async (req, res) => {
@@ -8,6 +9,7 @@ export const createHRContact = async (req, res) => {
     const contact = { ...req.body, added_by_user_id };
     const newContact = await HRContact.createHRContact(contact);
     res.status(201).json({ success: true, data: newContact });
+    await sendNewHRAddedEmail(process.env.ADMIN_EMAIL, req.user.full_name, newContact.company_name);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
