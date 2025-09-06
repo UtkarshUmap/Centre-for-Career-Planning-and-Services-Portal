@@ -53,6 +53,9 @@ const Sidebar = () => {
           <NavLink to="/hr-contacts" className={navLinkClass}>
             HR Contacts
           </NavLink>
+          <NavLink to="/caller-dashboard" className={navLinkClass}>
+            Caller DashBoard
+          </NavLink>
         </>
       )}
 

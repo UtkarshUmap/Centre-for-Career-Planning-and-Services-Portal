@@ -1,4 +1,4 @@
-import React from 'react';
+
 import './index.css';
 
 import { Toaster } from 'react-hot-toast'
@@ -28,18 +28,21 @@ import Dashboard from './pages/Dashboard';
 
 import AddThread from './components/DiscussionForum/AddThread';
 
-import HRContactsPage from './pages/student/HRContactsPage';
+// import HRContactsPage from './pages/student/HRContactsPage';
 
 // Admin Pages Imports
 import AddAlumni from './pages/admin/AddAlumni';
 import CreateJob from './pages/admin/CreateJob';
 import AdminJobList from './pages/admin/AdminJobList';
 import JobApplicants from './pages/admin/JobApplications';
+import CallerDashboard from './pages/student/CallerDashboard';
+
+import CallerHRContacts from './pages/student/CallerHRContacts';
 
 
 function App() {
   const { authUser } = useAuthContext();
-  const {showForgotPassword, showVerifyEmail, showAddThread} = useAppContext();
+  const {showForgotPassword, showVerifyEmail, showAddThread } = useAppContext();
   return (
     <>
 
@@ -60,7 +63,8 @@ function App() {
         <Route path='/referrals' element={<Referrals/>}/>
         <Route path='/resumebuilder' element={<ResumeBuilder/>} />
         <Route path='/alumni' element={<Alumni/>} />
-        <Route path='/hr-contacts' element={<HRContactsPage/>} />
+        <Route path='/hr-contacts' element={<CallerHRContacts />} />
+        <Route path='/caller-dashboard' element={<CallerDashboard/>} />
         {!authUser && <Route path='/reset-password/:resetToken' element={<ResetPasswordPage />} />}
         <Route
           path="/admin/jobs"

@@ -23,7 +23,7 @@ router.get('/:id', protectRoute, getHRContactById);
 router.post('/', protectRoute, authorizeRoles('admin', 'caller'), createHRContact);
 
 // Only admin can update (including assigning HR)
-router.put('/:id', protectRoute, authorizeRoles('admin'), updateHRContact);
+router.put('/:id', protectRoute, authorizeRoles('admin', 'caller'), updateHRContact);
 
 router.patch('/:id/assign', protectRoute, authorizeRoles('admin'), assignCallerToHR);
 

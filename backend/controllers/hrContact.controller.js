@@ -9,7 +9,7 @@ export const createHRContact = async (req, res) => {
     const contact = { ...req.body, added_by_user_id };
     const newContact = await HRContact.createHRContact(contact);
     res.status(201).json({ success: true, data: newContact });
-    await sendNewHRAddedEmail(process.env.ADMIN_EMAIL, req.user.full_name, newContact.company_name);
+    await sendNewHRAddedEmail("umaputkarsh50201@gmail.com", req.user.full_name, newContact.company_name);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
