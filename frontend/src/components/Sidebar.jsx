@@ -1,5 +1,5 @@
 // src/components/Sidebar.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import LogoutButton from "../pages/auth/LogoutButton";
@@ -20,7 +20,7 @@ const Sidebar = () => {
 
   const navItems = (
     <>
-      <NavLink to="/" className={navLinkClass}>
+      {/* <NavLink to="/" className={navLinkClass}>
         Home
       </NavLink>
       <NavLink to="/analytics" className={navLinkClass}>
@@ -28,14 +28,14 @@ const Sidebar = () => {
       </NavLink>
       <NavLink to="/alumni" className={navLinkClass}>
         Alumni
-      </NavLink>
+      </NavLink> */}
 
       {authUser.role === "caller" && (
         <>
-          <NavLink to="/profile" className={navLinkClass}>
+          {/* <NavLink to="/profile" className={navLinkClass}>
             Profile
-          </NavLink>
-          <NavLink to="/applications" className={navLinkClass}>
+          </NavLink> */}
+          {/* <NavLink to="/applications" className={navLinkClass}>
             Applications
           </NavLink>
           <NavLink to="/saved-applications" className={navLinkClass}>
@@ -46,15 +46,18 @@ const Sidebar = () => {
           </NavLink>
           <NavLink to="/resumebuilder" className={navLinkClass}>
             Resume Builder
-          </NavLink>
-          <NavLink to="/discussion-forum" className={navLinkClass}>
+          </NavLink> */}
+          {/* <NavLink to="/discussion-forum" className={navLinkClass}>
             Discussion Forum
-          </NavLink>
+            </NavLink> */}
+            <NavLink to="/caller-dashboard" className={navLinkClass}>
+              Caller DashBoard
+            </NavLink>
           <NavLink to="/hr-contacts" className={navLinkClass}>
             HR Contacts
           </NavLink>
-          <NavLink to="/caller-dashboard" className={navLinkClass}>
-            Caller DashBoard
+          <NavLink to="/caller-call-logs" className={navLinkClass}>
+            Caller Call Logs
           </NavLink>
         </>
       )}
@@ -66,6 +69,12 @@ const Sidebar = () => {
           </NavLink>
           <NavLink to="/admin/add-alumni" className={navLinkClass}>
             Add Alumni
+          </NavLink>
+          <NavLink to="/admin/assign-hr-contacts" className={navLinkClass}>
+            Contact Assignment
+          </NavLink>
+          <NavLink to="/admin/user-management" className={navLinkClass}>
+            User Management
           </NavLink>
         </>
       )}

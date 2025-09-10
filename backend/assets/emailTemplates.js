@@ -175,3 +175,44 @@ export const FOLLOW_UP_REMINDER_TEMPLATE = `
 </body>
 </html>
 `;
+
+
+
+export const CALLER_APPROVED_TEMPLATE = `
+  <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2 style="color: #0d9488;">You’ve Been Approved as a Caller 🎉</h2>
+    <p>Hello ,</p>
+    <p>
+      Great news! Your email <strong>{callerEmail}</strong> has been added to our
+      whitelist. You are now approved to join as a caller on our portal.
+    </p>
+    <p>
+      To get started, please create your account and sign up using the link below:
+    </p>
+    <p style="margin: 20px 0;">
+      <a href="{signupLink}" 
+         style="background-color: #0d9488; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none;">
+        Create Your Account
+      </a>
+    </p>
+    <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+    <p><a href="{signupLink}">{signupLink}</a></p>
+    <br/>
+    <p>Welcome aboard,</p>
+    <p><strong>CCPS</strong></p>
+  </div>
+`;
+
+
+export const ADMIN_SMS_TEMPLATE = `
+Hello {callerName},
+
+You have a new message from the Admin:
+
+"{adminMessage}"
+
+Please log in to your portal for more details.
+
+- Career Services Team
+`;
+

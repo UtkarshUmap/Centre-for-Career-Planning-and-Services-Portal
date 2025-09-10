@@ -1,6 +1,9 @@
 import ContactRow from './ContactRow';
 
-const ContactsTable = ({ contacts, currentUser }) => {
+
+const ContactsTable = ({ contacts, currentUser, setSelectedContact }) => {
+
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -19,7 +22,7 @@ const ContactsTable = ({ contacts, currentUser }) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {contacts.length > 0 ? (
               contacts.map((contact) => (
-                <ContactRow key={contact.id} contact={contact} currentUser={currentUser} />
+                <ContactRow key={contact.id} contact={contact} currentUser={currentUser} setSelectedContact={setSelectedContact} />
               ))
             ) : (
               <tr>
@@ -31,6 +34,7 @@ const ContactsTable = ({ contacts, currentUser }) => {
           </tbody>
         </table>
       </div>
+
     </div>
   );
 };

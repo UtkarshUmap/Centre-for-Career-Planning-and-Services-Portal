@@ -24,15 +24,20 @@ const LogCallForm = ({ hr, setLogForm, onSubmit }) => {
     };
 
     // Handle the form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Submitting:", formData);
 
-        e.preventDefault(); // Prevent default browser form submission
-        console.log("Submitting:", formData);
-        createCallLog(formData);
-       
-        onSubmit();
-        setLogForm(false); // Close the modal after submission
-    };
+  try {
+    await createCallLog(formData);
+    onSubmit();
+    setLogForm(false);
+  } catch (error) {
+    console.error("Failed to create call log:", error);
+    alert(error.response?.data?.message || "Something went wrong, please try again.");
+  }
+};
+
 
     return (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-60">

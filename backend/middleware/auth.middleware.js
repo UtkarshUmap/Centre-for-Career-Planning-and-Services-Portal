@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { config } from "dotenv";
 import pool from "../config/postgredb.js";
 import CallLog from "../models/callLog.model.js";
+import HRContact from "../models/hrContact.model.js";
 
 config();
 
@@ -79,4 +80,52 @@ export const authorizeUpdateLog = async (req, res, next) => {
     console.error("Error in authorizeUpdateLog middleware: ", error.message);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
+};
+
+
+
+
+export const createLogAuthorization = async (req, res, next) => {
+  try {
+    const { contact_id } = req.body;
+
+    if (!contact_id) {
+      return res.status(400).json({ success: false, message: "contact_id is required" });
+    }
+
+    const contact = await HRContact.getHRContactById(contact_id);
+
+    if (!contact) {
+      return res.status(404).json({ success: false, message: "Contact not found" });
+    }
+
+    // Check assigned HR
+    if (contact.assigned_to_user_id !== req.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to add log for this contact",
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Error in createLogAuthorization middleware:", error.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+
+
+export const trackActivity = async (req, res, next) => {
+  if (req.user) {
+    try {
+      await pool.query(
+        `UPDATE users SET last_active_at = NOW() WHERE user_id = $1`,
+        [req.user.user_id]
+      );
+    } catch (err) {
+      console.error("Error updating last_active_at:", err.message);
+    }
+  }
+  next();
 };

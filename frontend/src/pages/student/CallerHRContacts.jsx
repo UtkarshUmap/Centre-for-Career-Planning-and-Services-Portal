@@ -5,6 +5,8 @@ import HeaderSection from '../../components/callerHRContacts/HeaderSection.jsx';
 import FiltersBar from '../../components/callerHRContacts/FiltersBar.jsx';
 import ContactsTable from '../../components/callerHRContacts/ContactTable.jsx';
 import Sidebar from '../../components/Sidebar.jsx';
+import AddHRContactForm from '../../components/callerHRContacts/AddHRContactForm.jsx';
+import HRContactDetailsPage from '../../components/callerHRContacts/HRContactDetails/HRContactDetailsPage.jsx';
 
 const HRContactsPage = () => {
   const [contacts, setContacts] = useState([]);
@@ -16,16 +18,19 @@ const HRContactsPage = () => {
 
   const [showAddHRContactModal, setShowAddHRContactModal] = useState(false);
 
-  useEffect(() => {
+  const [selectedContact, setSelectedContact] = useState(null);
+
     const fetchContacts = async () => {
-      try {
-        const response = await getAllHRContacts();
-        setContacts(response.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchContacts();
+    try {
+      const response = await getAllHRContacts();
+      setContacts(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchContacts(); // call once on mount
   }, []);
 
   useEffect(() => {
@@ -68,10 +73,26 @@ const HRContactsPage = () => {
           assignmentFilter={assignmentFilter}
           setAssignmentFilter={setAssignmentFilter}
         />
-        <ContactsTable contacts={filteredContacts} currentUser={CURRENT_USER_ID} />
+        <ContactsTable contacts={filteredContacts} currentUser={CURRENT_USER_ID} setSelectedContact={setSelectedContact} />
       </div>
     </div>
+
+
+     { showAddHRContactModal && (
+    <AddHRContactForm setShowAddHRContactModal={setShowAddHRContactModal} fetchContacts={fetchContacts} />
+  )}
+
+
+     { selectedContact && (
+       <HRContactDetailsPage selectedContact={selectedContact} onClose={() => setSelectedContact(null)} />
+     )}
+
+
+
   </div>
+
+ 
+
 );
 
 };

@@ -5,8 +5,7 @@ export const getCallerStats = async (callerId) => {
   const query = `
     SELECT 
       COUNT(*) FILTER (WHERE hc.assigned_to_user_id = $1) AS total_contacts,
-      COUNT(*) FILTER (WHERE hc.assigned_to_user_id = $1 AND hc.is_approved = true) AS approved_contacts,
-      COUNT(*) FILTER (WHERE hc.assigned_to_user_id = $1 AND hc.is_approved = false) AS unapproved_contacts,
+      COUNT(*) FILTER (WHERE hc.added_by_user_id = $1 AND hc.is_approved = true) AS approved_contacts,
       COUNT(cl.*) FILTER (WHERE cl.caller_id = $1) AS total_call_logs,
       COUNT(cl.*) FILTER (WHERE cl.caller_id = $1 AND cl.call_outcome = 'connected') AS connected_calls,
       COUNT(cl.*) FILTER (WHERE cl.caller_id = $1 AND cl.next_follow_up_date IS NOT NULL) AS follow_up_calls

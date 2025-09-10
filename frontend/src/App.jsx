@@ -22,7 +22,7 @@ import ResumeBuilder from './pages/student/ResumeBuilder';
 import DiscussionForum from './pages/student/DiscussionForum';
 import AnalyticsDashboard from './pages/student/AnalyticsDashboard';
 
-import Home from './pages/Home';
+// import Home from './pages/Home';
 import Referrals from './pages/Referrals';
 import Dashboard from './pages/Dashboard';
 
@@ -38,6 +38,11 @@ import JobApplicants from './pages/admin/JobApplications';
 import CallerDashboard from './pages/student/CallerDashboard';
 
 import CallerHRContacts from './pages/student/CallerHRContacts';
+import CallerCallLogs from './pages/student/CallerCallLogs';
+
+//Admin
+import HRAssignment from './pages/admin/HRAssignment';
+import UserManagement from './pages/admin/UserManagement';
 
 
 function App() {
@@ -53,7 +58,8 @@ function App() {
       
       <Routes>
         
-        <Route path='/' element={authUser ? <Home /> : <Navigate to='/login' />} />
+        <Route path='/' element={authUser ? <CallerDashboard /> : <Navigate to='/login' />} />
+        {/* <Route path='/' element={authUser ? <Home /> : <Navigate to='/login' />} /> */}
         <Route path='/profile' element={authUser ? <Profile /> : <Navigate to='/login' />} />
         <Route path='/discussion-forum' element={authUser ? <DiscussionForum /> : <Navigate to='/login' />} />
         <Route path='/dashboard' element={authUser ? <Dashboard /> : <Navigate to='/login' />} />
@@ -65,6 +71,11 @@ function App() {
         <Route path='/alumni' element={<Alumni/>} />
         <Route path='/hr-contacts' element={<CallerHRContacts />} />
         <Route path='/caller-dashboard' element={<CallerDashboard/>} />
+        <Route path='/caller-call-logs' element={<CallerCallLogs/>} />
+
+        <Route path='/admin/assign-hr-contacts' element={authUser?.role === 'admin' ? <HRAssignment /> : <Navigate to='/' />} />
+        <Route path='/admin/user-management' element={authUser?.role === 'admin' ? <UserManagement /> : <Navigate to='/' />} />
+
         {!authUser && <Route path='/reset-password/:resetToken' element={<ResetPasswordPage />} />}
         <Route
           path="/admin/jobs"

@@ -1,5 +1,5 @@
 // src/api/hrContacts.js
-import apiClient from "../../utils/apiClient";
+import apiClient from "../../utils/apiClient.js";
 
 export const getAllHRContacts = async (params = {}) => {
   const { data } = await apiClient.get("/hr-contacts", { params });
@@ -32,6 +32,21 @@ export const assignCallerToHR = async (id, userId) => {
   });
   return data;
 };
+
+
+export const bulkAssignHRsToCaller = async (callerId, hrIds) => {
+  const { data } = await apiClient.post(`/hr-contacts/assign/${callerId}`, {
+    hrIds,
+  });
+  return data;
+};
+
+
+export const bulkUnassignHRs = async (hrIds) => {
+  const { data } = await apiClient.post(`/hr-contacts/unassign`, { hrIds });
+  return data;
+};
+
 
 export const exportHRContactsCSV = async () => {
   const { data } = await apiClient.get("/hr-contacts/export/csv");

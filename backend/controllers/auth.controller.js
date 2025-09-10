@@ -13,60 +13,88 @@ const updateTimestamp = async (userId) => {
 };
 
 export const signup = async (req, res) => {
-    try {
-        const { name, email, password, role } = req.body;
+  try {
+    const { name, email, password, role } = req.body;
 
-        // Role-based email validation
-        if (role !== "Recruiter") {
-            if (!email.endsWith('@iitbhilai.ac.in')) {
-                return res.status(400).json({ success: false, message: 'Only IIT Bhilai emails are allowed for this role' });
-            }
-        }
-
-        const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = userResult.rows[0];
-
-        const verificationToken = Math.floor(100000 + (Math.random() * 900000)).toString();
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        if (user) {
-            // If user exists but is not verified, update their info and resend verification
-            if (user.is_verified) {
-                return res.status(400).json({ success: false, message: "User already exists and is verified" });
-            }
-
-            const verificationTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
-
-            const updateUserQuery = `
-                UPDATE users 
-                SET full_name = $1, password_hash = $2, verification_token = $3, verification_token_expires_at = $4, updated_at = NOW()
-                WHERE user_id = $5
-                RETURNING user_id`;
-            
-            const updatedUser = await pool.query(updateUserQuery, [name, hashedPassword, verificationToken, verificationTokenExpiresAt, user.user_id]);
-            
-            await sendVerificationEmail(user.email, verificationToken);
-            return res.status(200).json({ success: true, userId: updatedUser.rows[0].user_id });
-        }
-
-        // Create a new user if one doesn't exist
-        const verificationTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
-
-        const insertUserQuery = `
-            INSERT INTO users (full_name, email, role, password_hash, verification_token, verification_token_expires_at)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING user_id`;
-
-        const newUser = await pool.query(insertUserQuery, [name, email, role, hashedPassword, verificationToken, verificationTokenExpiresAt]);
-        
-        await sendVerificationEmail(email, verificationToken);
-        res.status(201).json({ success: true, userId: newUser.rows[0].user_id });
-
-    } catch (e) {
-        console.error("Error in signup controller", e.message);
-        res.status(500).json({ success: false, error: "Server Error" });
+    // Role-based email validation
+    if (role !== "Recruiter") {
+      if (!email.endsWith("@iitbhilai.ac.in")) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Only IIT Bhilai emails are allowed for this role" });
+      }
     }
+
+    // Check if user already exists
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const user = userResult.rows[0];
+
+    // Prepare password & token
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const verificationTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    if (user) {
+      // User already exists
+      if (user.is_verified) {
+        return res
+          .status(400)
+          .json({ success: false, message: "User already exists and is verified" });
+      }
+
+      // Update existing unverified user
+      const updateUserQuery = `
+        UPDATE users 
+        SET full_name = $1, password_hash = $2, verification_token = $3, verification_token_expires_at = $4, updated_at = NOW()
+        WHERE user_id = $5
+        RETURNING user_id`;
+      const updatedUser = await pool.query(updateUserQuery, [
+        name,
+        hashedPassword,
+        verificationToken,
+        verificationTokenExpiresAt,
+        user.user_id,
+      ]);
+
+      await sendVerificationEmail(user.email, verificationToken);
+      return res
+        .status(200)
+        .json({ success: true, userId: updatedUser.rows[0].user_id });
+    }
+
+    // 🔹 Check if email is in preapproved_emails
+    const preapprovedRes = await pool.query(
+      "SELECT 1 FROM preapproved_emails WHERE email = $1",
+      [email]
+    );
+    const isPreapproved = preapprovedRes.rowCount > 0;
+
+    // Insert new user
+    const insertUserQuery = `
+      INSERT INTO users (full_name, email, role, password_hash, verification_token, verification_token_expires_at, is_approved)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING user_id`;
+
+    const newUser = await pool.query(insertUserQuery, [
+      name,
+      email,
+      role,
+      hashedPassword,
+      verificationToken,
+      verificationTokenExpiresAt,
+      isPreapproved, // ✅ Auto-approved if in preapproved_emails
+    ]);
+
+    await sendVerificationEmail(email, verificationToken);
+
+    res
+      .status(201)
+      .json({ success: true, userId: newUser.rows[0].user_id, autoApproved: isPreapproved });
+  } catch (e) {
+    console.error("Error in signup controller", e.message);
+    res.status(500).json({ success: false, error: "Server Error" });
+  }
 };
 
 export const sendCodeAgain = async (req, res) => {

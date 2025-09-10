@@ -6,7 +6,9 @@ import {
   updateHRContact,
   deleteHRContact,
   assignCallerToHR,
-  exportHRContactsCSV
+  exportHRContactsCSV,
+  assignHRsToCaller,
+  unassignHRs
 } from '../controllers/hrContact.controller.js';
 
 import { protectRoute, authorizeRoles } from '../middleware/auth.middleware.js';
@@ -33,5 +35,13 @@ router.delete('/:id', protectRoute, authorizeRoles('admin'), deleteHRContact);
 
 // Only admin can export CSV
 router.get('/export/csv', protectRoute, authorizeRoles('admin'), exportHRContactsCSV);
+
+
+//Assign HR in Bulk , Only Admin can assign
+router.post("/assign/:callerId", protectRoute, authorizeRoles("admin"), assignHRsToCaller);
+
+// Unassign HR in Bulk , Only Admin can unassign
+router.post("/unassign", protectRoute, authorizeRoles("admin"), unassignHRs);
+
 
 export default router;

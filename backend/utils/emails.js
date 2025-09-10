@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({});
 
-import { PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE, NEW_HR_ADDED_TEMPLATE,  HR_ASSIGNED_TEMPLATE,   FOLLOW_UP_REMINDER_TEMPLATE } from "../assets/emailTemplates.js";
+import { PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE, NEW_HR_ADDED_TEMPLATE,  HR_ASSIGNED_TEMPLATE,   FOLLOW_UP_REMINDER_TEMPLATE, CALLER_APPROVED_TEMPLATE, ADMIN_SMS_TEMPLATE } from "../assets/emailTemplates.js";
 import transporter from "../config/nodemailer.js";
 
 const sendVerificationEmail = async (email, verificationToken) => {
@@ -113,6 +113,46 @@ const sendFollowUpReminderEmail = async (callerEmail, hrName, cycle) => {
 
 
 
+const sendCallerApprovedEmail = async (callerEmail, signupLink) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_SENDER_EMAIL,
+      to: callerEmail,
+      subject: "You’re Approved as a Caller – Create Your Account",
+      html: CALLER_APPROVED_TEMPLATE
+        .replace("{callerEmail}", callerEmail)
+        .replace(/{signupLink}/g, signupLink), // replace all
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Caller approved email sent");
+  } catch (err) {
+    console.error("Error sending caller approved email:", err.message);
+  }
+};
 
 
-export { sendVerificationEmail, sendPasswordResetEmail, sendPasswordResetSuccessEmail, sendNewHRAddedEmail, sendHRAssignedEmail, sendFollowUpReminderEmail };
+const sendAdminSMSToCaller = async (email, full_name, adminMessage) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_SENDER_EMAIL,
+      to: email,
+      subject: "New Message from Admin",
+      html: ADMIN_SMS_TEMPLATE
+        .replace("{callerName}", full_name)
+        .replace("{adminMessage}", adminMessage),
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Admin SMS (email) sent to caller");
+  } catch (err) {
+    console.error("Error sending Admin SMS to caller:", err.message);
+  }
+};
+
+
+
+
+
+
+export { sendVerificationEmail, sendPasswordResetEmail, sendPasswordResetSuccessEmail, sendNewHRAddedEmail, sendHRAssignedEmail, sendFollowUpReminderEmail, sendCallerApprovedEmail, sendAdminSMSToCaller };

@@ -17,29 +17,31 @@ const CallLog = {
 
   // Get all logs
   async getAllLogs() {
-    const query = `
-      SELECT cl.*, hc.full_name AS hr_name, u.full_name AS caller_name
-      FROM call_logs cl
-      JOIN hr_contacts hc ON cl.contact_id = hc.contact_id
-      JOIN users u ON cl.caller_id = u.user_id
-      ORDER BY cl.call_timestamp DESC;
-    `;
-    const result = await pool.query(query);
-    return result.rows;
-  },
+  const query = `
+    SELECT cl.*, hc.full_name AS hr_name, u.full_name AS caller_name, c.company_name
+    FROM call_logs cl
+    JOIN hr_contacts hc ON cl.contact_id = hc.contact_id
+    JOIN users u ON cl.caller_id = u.user_id
+    LEFT JOIN companies c ON hc.company_id = c.company_id
+    ORDER BY cl.call_timestamp DESC;
+  `;
+  const result = await pool.query(query);
+  return result.rows;
+},
 
   // Get a single log by ID
   async getLogById(log_id) {
-    const query = `
-      SELECT cl.*, hc.full_name AS hr_name, u.full_name AS caller_name
-      FROM call_logs cl
-      JOIN hr_contacts hc ON cl.contact_id = hc.contact_id
-      JOIN users u ON cl.caller_id = u.user_id
-      WHERE cl.log_id = $1;
-    `;
-    const result = await pool.query(query, [log_id]);
-    return result.rows[0];
-  },
+  const query = `
+    SELECT cl.*, hc.full_name AS hr_name, u.full_name AS caller_name, c.company_name
+    FROM call_logs cl
+    JOIN hr_contacts hc ON cl.contact_id = hc.contact_id
+    JOIN users u ON cl.caller_id = u.user_id
+    LEFT JOIN companies c ON hc.company_id = c.company_id
+    WHERE cl.log_id = $1;
+  `;
+  const result = await pool.query(query, [log_id]);
+  return result.rows[0];
+},
 
   // Update a log
   async updateLog(log_id, data) {

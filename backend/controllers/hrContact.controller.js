@@ -78,6 +78,62 @@ export const assignCallerToHR = async (req, res) => {
 };
 
 
+// Assign multiple HRs to a caller
+export const assignHRsToCaller = async (req, res) => {
+  try {
+    const { hrIds } = req.body; 
+    const { callerId } = req.params;
+
+    if (!Array.isArray(hrIds) || hrIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "hrIds must be a non-empty array",
+      });
+    }
+
+    const updatedContacts = await HRContact.assignHRsToCaller(callerId, hrIds);
+
+    res.json({
+      success: true,
+      data: updatedContacts,
+    });
+  } catch (error) {
+    console.error("Error in assignHRsToCaller:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+
+// Unassign multiple HRs
+export const unassignHRs = async (req, res) => {
+  try {
+    const { hrIds } = req.body;
+
+    if (!Array.isArray(hrIds) || hrIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "hrIds must be a non-empty array",
+      });
+    }
+
+    const updatedContacts = await HRContact.unassignHRs(hrIds);
+
+    res.json({
+      success: true,
+      data: updatedContacts,
+    });
+  } catch (error) {
+    console.error("Error in unassignHRs:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 
 
 
