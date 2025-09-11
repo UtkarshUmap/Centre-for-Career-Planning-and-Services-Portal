@@ -43,6 +43,7 @@ import CallerCallLogs from './pages/student/CallerCallLogs';
 //Admin
 import HRAssignment from './pages/admin/HRAssignment';
 import UserManagement from './pages/admin/UserManagement';
+import AdminDashboardPage from './pages/admin/AdminDashboard';
 
 
 function App() {
@@ -73,8 +74,10 @@ function App() {
         <Route path='/caller-dashboard' element={<CallerDashboard/>} />
         <Route path='/caller-call-logs' element={<CallerCallLogs/>} />
 
+
         <Route path='/admin/assign-hr-contacts' element={authUser?.role === 'admin' ? <HRAssignment /> : <Navigate to='/' />} />
         <Route path='/admin/user-management' element={authUser?.role === 'admin' ? <UserManagement /> : <Navigate to='/' />} />
+        <Route path='/admin/admin-dashboard' element={authUser?.role === 'admin' ? <AdminDashboardPage /> : <Navigate to='/' />} />
 
         {!authUser && <Route path='/reset-password/:resetToken' element={<ResetPasswordPage />} />}
         <Route

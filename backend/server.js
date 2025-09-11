@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import connectDB from "./config/db.js";
+// import connectDB from "./config/db.js";
 import apiRouter from "./routes/index.router.js";
 
 dotenv.config();
@@ -28,6 +28,6 @@ app.use("/api", apiRouter);
 
 // Start the server
 app.listen(port, () => {
-  connectDB();
+  // connectDB();
   console.log(`Server is running at port ${port}`);
 });

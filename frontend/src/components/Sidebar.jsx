@@ -76,6 +76,9 @@ const Sidebar = () => {
           <NavLink to="/admin/user-management" className={navLinkClass}>
             User Management
           </NavLink>
+          <NavLink to="/admin/admin-dashboard" className={navLinkClass}>
+            Admin DashBoard
+          </NavLink>
         </>
       )}
     </>
