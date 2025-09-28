@@ -64,18 +64,12 @@ const Sidebar = () => {
 
       {authUser.role === "admin" && (
         <>
-          <NavLink to="/admin/create-job" className={navLinkClass}>
+          {/* <NavLink to="/admin/create-job" className={navLinkClass}>
             Create Job
           </NavLink>
           <NavLink to="/admin/add-alumni" className={navLinkClass}>
             Add Alumni
-          </NavLink>
-          <NavLink to="/admin/assign-hr-contacts" className={navLinkClass}>
-            Contact Assignment
-          </NavLink>
-          <NavLink to="/admin/user-management" className={navLinkClass}>
-            User Management
-          </NavLink>
+          </NavLink> */}
           <NavLink to="/admin/admin-dashboard" className={navLinkClass}>
             Admin DashBoard
           </NavLink>
@@ -84,6 +78,12 @@ const Sidebar = () => {
           </NavLink>
           <NavLink to="/admin/hr-call-log" className={navLinkClass}>
             HR Master Call Logs
+          </NavLink>
+          <NavLink to="/admin/assign-hr-contacts" className={navLinkClass}>
+            Contact Assignment
+          </NavLink>
+          <NavLink to="/admin/user-management" className={navLinkClass}>
+            User Management
           </NavLink>
         </>
       )}
