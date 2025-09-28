@@ -68,6 +68,7 @@ const HRContactsPage = () => {
       <div className="max-w-7xl mx-auto">
         <HeaderSection setShowAddHRContactModal={setShowAddHRContactModal} />
         <FiltersBar
+          contacts={filteredContacts}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           assignmentFilter={assignmentFilter}

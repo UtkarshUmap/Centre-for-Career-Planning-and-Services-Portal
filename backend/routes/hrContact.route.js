@@ -8,7 +8,8 @@ import {
   assignCallerToHR,
   exportHRContactsCSV,
   assignHRsToCaller,
-  unassignHRs
+  unassignHRs,
+  toggleApproval
 } from '../controllers/hrContact.controller.js';
 
 import { protectRoute, authorizeRoles } from '../middleware/auth.middleware.js';
@@ -42,6 +43,9 @@ router.post("/assign/:callerId", protectRoute, authorizeRoles("admin"), assignHR
 
 // Unassign HR in Bulk , Only Admin can unassign
 router.post("/unassign", protectRoute, authorizeRoles("admin"), unassignHRs);
+
+//Toggle the Approval of the HR
+router.put("/:id/toggle-approval", protectRoute, authorizeRoles("admin"), toggleApproval);
 
 
 export default router;

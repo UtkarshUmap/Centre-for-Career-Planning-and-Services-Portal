@@ -22,7 +22,7 @@ const ContactDetails = ({ selectedContact }) => {
         <div className="ml-4">
           <h3 className="text-xl font-bold text-slate-900">{selectedContact.full_name}</h3>
           <p className="text-sm text-slate-600">{selectedContact.designation}</p>
-          <p className="text-sm text-slate-500">{selectedContact.company_id}</p>
+          <p className="text-sm text-slate-500">{selectedContact.company_name}</p>
         </div>
       </div>
 

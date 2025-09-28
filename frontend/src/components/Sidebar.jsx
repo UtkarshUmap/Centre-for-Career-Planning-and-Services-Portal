@@ -79,6 +79,12 @@ const Sidebar = () => {
           <NavLink to="/admin/admin-dashboard" className={navLinkClass}>
             Admin DashBoard
           </NavLink>
+          <NavLink to="/admin/hr-contacts-repository" className={navLinkClass}>
+            HR Contacts Repository
+          </NavLink>
+          <NavLink to="/admin/hr-call-log" className={navLinkClass}>
+            HR Master Call Logs
+          </NavLink>
         </>
       )}
     </>

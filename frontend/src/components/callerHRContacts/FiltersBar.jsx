@@ -1,6 +1,7 @@
 import { Search, Download } from 'lucide-react';
+import { exportToCSV } from '../../utils/exportCSV';
 
-const FiltersBar = ({ searchTerm, setSearchTerm, assignmentFilter, setAssignmentFilter }) => {
+const FiltersBar = ({ contacts, searchTerm, setSearchTerm, assignmentFilter, setAssignmentFilter }) => {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="relative flex-grow">
@@ -25,7 +26,8 @@ const FiltersBar = ({ searchTerm, setSearchTerm, assignmentFilter, setAssignment
         <option value="assigned">Assigned</option>
         <option value="unassigned">Unassigned</option>
       </select>
-      <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+      <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+      onClick={()=>exportToCSV(contacts,"Filtered_HR_Contacts.csv")}>
         <Download className="h-4 w-4" /> Export CSV
       </button>
     </div>

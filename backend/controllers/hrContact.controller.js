@@ -149,6 +149,30 @@ export const deleteHRContact = async (req, res) => {
   }
 };
 
+
+
+export const toggleApproval = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedContact = await HRContact.toggleHRContactApproval(id);
+
+    if (!updatedContact) {
+      return res.status(404).json({ message: "HR Contact not found" });
+    }
+
+    res.json({
+      message: `HR Contact approval status updated to ${updatedContact.is_approved}`,
+      contact: updatedContact,
+    });
+  } catch (error) {
+    console.error("Error toggling HR contact approval:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 // EXPORT HR contacts as CSV
 export const exportHRContactsCSV = async (req, res) => {
   try {

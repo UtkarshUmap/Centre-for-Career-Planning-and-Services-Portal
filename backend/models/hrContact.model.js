@@ -136,6 +136,19 @@ async getHRContactById(contact_id) {
 
 
 
+async toggleHRContactApproval(contact_id) {
+  const result = await pool.query(
+    `UPDATE hr_contacts
+     SET is_approved = NOT is_approved, updated_at = NOW()
+     WHERE contact_id = $1
+     RETURNING *`,
+    [contact_id]
+  );
+
+  return result.rows[0];
+},
+
+
 
 async assignCallerToHR(contact_id, assigned_to_user_id) {
   const query = `

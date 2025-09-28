@@ -44,6 +44,8 @@ import CallerCallLogs from './pages/student/CallerCallLogs';
 import HRAssignment from './pages/admin/HRAssignment';
 import UserManagement from './pages/admin/UserManagement';
 import AdminDashboardPage from './pages/admin/AdminDashboard';
+import AdminHRContactsRepository from './pages/admin/AdminContactRepository';
+import AdminCallLog from './pages/admin/AdminCallLog'
 
 
 function App() {
@@ -78,6 +80,8 @@ function App() {
         <Route path='/admin/assign-hr-contacts' element={authUser?.role === 'admin' ? <HRAssignment /> : <Navigate to='/' />} />
         <Route path='/admin/user-management' element={authUser?.role === 'admin' ? <UserManagement /> : <Navigate to='/' />} />
         <Route path='/admin/admin-dashboard' element={authUser?.role === 'admin' ? <AdminDashboardPage /> : <Navigate to='/' />} />
+        <Route path='/admin/hr-contacts-repository' element={authUser?.role === 'admin' ? <AdminHRContactsRepository /> : <Navigate to='/' />} />
+        <Route path='/admin/hr-call-log' element={authUser?.role === 'admin' ? <AdminCallLog/> : <Navigate to='/' />} />s
 
         {!authUser && <Route path='/reset-password/:resetToken' element={<ResetPasswordPage />} />}
         <Route

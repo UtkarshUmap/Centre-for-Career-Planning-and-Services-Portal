@@ -21,6 +21,12 @@ export const updateHRContact = async (id, updates) => {
   return data;
 };
 
+export const toggleHRContactApproval = async (id) => {
+  const { data } = await apiClient.put(`/hr-contacts/${id}/toggle-approval`);
+  return data;
+};
+
+
 export const deleteHRContact = async (id) => {
   const { data } = await apiClient.delete(`/hr-contacts/${id}`);
   return data;

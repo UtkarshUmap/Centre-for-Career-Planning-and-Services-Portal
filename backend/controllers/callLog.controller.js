@@ -55,7 +55,7 @@ export const deleteCallLog = async (req, res) => {
   try {
     const log_id = req.params.id;
 
-    const log = await CallLog.getCallLogById(log_id);
+    const log = await CallLog.getLogById(log_id);
     if (!log) return res.status(404).json({ success: false, message: "Log not found" });
 
     const deletedLog = await CallLog.deleteLog(log_id);
