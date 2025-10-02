@@ -18,8 +18,9 @@ export const signup = async (req, res) => {
                     message: 'Only IIT Bhilai emails are allowed',
                 });
             }
+            //added different condition for recruiter signin
         } else if (role === "Recruiter") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //for valid email check
             if (!emailRegex.test(email)) {
                 return res.status(400).json({ success: false, message: "Invalid email format" });
             }
