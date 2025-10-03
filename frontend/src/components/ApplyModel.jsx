@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { applyToJob } from "../api/useApply";
 import { toast } from "react-hot-toast";
 
-const ApplyModal = ({ jobId, applicationLink, onClose, onApplied }) => {
+const ApplyModal = ({ jobId, applicationLink, userProfile, onClose, onApplied }) => {
   const [formData, setFormData] = useState({
-    resume: "",
-    phone: "",
-    address: "",
+    resume: userProfile?.resumeUrl || "",
+    phone: userProfile?.phone || "",
+    address: userProfile?.address || "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -19,6 +19,7 @@ const ApplyModal = ({ jobId, applicationLink, onClose, onApplied }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!window.confirm("Apply with saved details?")) return;
     setLoading(true);
     try {
       await applyToJob({
