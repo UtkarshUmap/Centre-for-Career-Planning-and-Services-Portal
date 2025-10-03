@@ -89,6 +89,8 @@ export const getStudentProfile = async (req, res) => {
       cgpa: student?.CGPA || "",
       imageUrl:student?.profilePhotoURL || "",
       resumeUrl:student?.resumeLink || "",
+      phone: user.phone || "",
+      address: user.address || "",
     };
 
     return res.json(profile);
