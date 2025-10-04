@@ -31,7 +31,7 @@ const Alumni = () => {
     company: "Company Name",
     jobRole: "Job Role",
     jobId: "Job ID",
-    batch: "Batch (e.g., 2022)",
+    batch: "Batch (e.g., 2022 or 2022-2025)",
     name: "Name",
   };
 
