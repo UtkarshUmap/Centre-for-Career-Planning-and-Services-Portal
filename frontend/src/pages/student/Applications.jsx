@@ -5,7 +5,18 @@ import { fetchJobs, fetchMyApplications, fetchAppliedJobs } from "../../api/useA
 import Sidebar from "../../components/Sidebar";
 import ApplyModal from "../../components/ApplyModel";
 import { saveJob } from "../../api/useSavedJobs";
+
 import JobCard from "../../components/JobCard";
+
+import { useAuthContext } from "../../context/AuthContext";
+import { getStudentProfile } from "../../api/profile/useStudentProfile";
+
+const userData = {
+  resumeUrl: "",
+  phone: "",
+  address: "",
+};
+
 
 const Applications = () => {
   const [jobs, setJobs] = useState([]);
@@ -15,14 +26,22 @@ const Applications = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [search, setSearch] = useState("");
+
   const [activeTab, setActiveTab] = useState("jobs"); // <-- NEW STATE for tab
+
+  const { authUser } = useAuthContext();
+  const [profile, setProfile] = useState(userData);
+
 
   const loadAll = async () => {
     try {
       const [jobList, { onCampus, offCampus }, dedicatedAppliedList] = await Promise.all([
         fetchJobs(),
         fetchMyApplications(),
+
         fetchAppliedJobs(), // Fetch dedicated applied list
+
+        fetchProfile(),
       ]);
       setJobs(jobList);
       setMyApps([...onCampus, ...offCampus]);
@@ -34,6 +53,23 @@ const Applications = () => {
       setLoading(false);
     }
   };
+
+  const fetchProfile = () => {
+    if (!authUser?._id) return;
+    setLoading(true);
+    getStudentProfile(authUser._id)
+      .then((data) => {
+        setProfile({ ...userData, ...data });
+      })
+      .catch(() => {
+        setProfile((prev) => ({
+          ...prev,
+          resumeUrl: authUser.resumeUrl,
+          phone: authUser.phone,
+          address: authUser.address,
+        }));
+      }).finally(() => setLoading(false));
+    };
 
   useEffect(() => {
     loadAll();
@@ -383,7 +419,9 @@ const Applications = () => {
 
       {isModalOpen && selectedJob && (
         <ApplyModal
-          job={selectedJob}
+          jobId={selectedJob._id}
+          applicationLink={selectedJob.ApplicationLink}
+          userProfile={profile}
           onClose={() => setIsModalOpen(false)}
           onApplied={handleApplied}
         />

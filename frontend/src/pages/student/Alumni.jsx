@@ -21,11 +21,17 @@ const Alumni = () => {
     setAlumniList(data.length > 0 ? data : []);
   };
 
+  const handleReset = () => {
+    setSearch("");
+    setSearchType("company");
+    setAlumniList(alumni);
+  };
+
   const labelMap = {
     company: "Company Name",
     jobRole: "Job Role",
     jobId: "Job ID",
-    batch: "Batch (e.g., 2022)",
+    batch: "Batch (e.g., 2022 or 2022-2025)",
     name: "Name",
   };
 
@@ -65,6 +71,12 @@ const Alumni = () => {
               className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-[#13665b] "
             >
               Search
+            </button>
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-[#13665b] "
+            >
+              Reset Search
             </button>
           </div>
 

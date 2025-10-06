@@ -59,8 +59,20 @@ export const searchAlumniByBatch = async (req, res) => {
   console.log(batch);
   if (!batch) return res.status(400).json({ message: "Batch is required" });
 
+  let query = {};
+  if (batch.includes('-')) {
+    const [start, end] = batch.split('-').map(Number);
+    if (!start || !end) {
+      return res.status(400).json({ message: "Invalid batch range format" });
+    }
+    query.batch = { $gte: start, $lte: end };
+  } else {
+    query.batch = batch;
+  }
+  console.log(query);
+
   try {
-    const alumni = await Alumni.find({ batch });
+    const alumni = await Alumni.find({ ...query });
     if (!alumni.length) return res.status(404).json({ message: "No alumni found for the given batch" });
     res.json(alumni);
   } catch (error) {
