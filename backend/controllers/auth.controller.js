@@ -11,21 +11,28 @@ dotenv.config();
 export const signup = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
-        if (role === "Student" || role === "Admin") {
+
+        if (role === "student" || role === "admin") {
             if (!email.endsWith("@iitbhilai.ac.in")) {
                 return res.status(400).json({
                     success: false,
                     message: 'Only IIT Bhilai emails are allowed',
                 });
             }
-            //added different condition for recruiter signin
-        } else if (role === "Recruiter") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //for valid email check
+        } else if (role === "recruiter") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                return res.status(400).json({ success: false, message: "Invalid email format" });
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid email format"
+                });
             }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid role specified. Must be 'student', 'admin', or 'recruiter'."
+            });
         }
-
         const user = await User.findOne({ email });
         const verificationToken = Math.floor(100000 + (Math.random() * 900000)).toString();
 
