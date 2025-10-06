@@ -12,6 +12,8 @@ const Alumni = () => {
   const [search, setSearch] = useState("");
   const [searchType, setSearchType] = useState("company");
   const [alumniList, setAlumniList] = useState([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeAlumniIndex, setActiveAlumniIndex] = useState(-1);
 
   const { loading: loadingAll, alumni } = useGetAllAlumni();
   const { loading: loadingSearch, getAlumni } = useGetAlumni();
@@ -32,6 +34,11 @@ const Alumni = () => {
     setAlumniList(alumni);
   };
 
+  const handleContextMenuToggle = (index) => {
+    setIsMenuOpen(!isMenuOpen);
+    setActiveAlumniIndex(isMenuOpen ? -1 : index);
+  };
+
   const handleDeleteAlumni = (id) => async () => {
     const token = localStorage.getItem("ccps-token");
     if (!id) return;
@@ -39,9 +46,12 @@ const Alumni = () => {
       try {
         await deleteAlumni(id, token);
         setAlumniList((prev) => prev.filter((alum) => alum._id !== id));
+        setIsMenuOpen(false);
       } catch (error) {
         toast.error("Failed to delete alumni");
       }
+    } else {
+      setIsMenuOpen(false);
     }
   };
 
@@ -102,12 +112,32 @@ const Alumni = () => {
             <p className="text-center text-gray-600">Loading...</p>
           ) : alumniList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {alumniList.map((alum) => (
+              {alumniList.map((alum, index) => (
                 <div
                   key={alum._id}
                   className="bg-white p-6 rounded-xl shadow hover:shadow-md transition"
                 >
-                  <h3 className="text-xl font-semibold text-[#13665b] ">{alum.name}</h3>
+                  <div className="grid grid-cols-2">
+                    <div className="col-start-1 col-end-3">
+                      <h3 className="text-xl font-semibold text-[#13665b]">{alum.name}</h3>
+                    </div>
+                    {authUser?.role == "admin" && (
+                      <div className="col-span-2 col-end-7">
+                        <div className="relative">
+                          <div className="flex flex-col space-y-1" role="button" onClick={() => handleContextMenuToggle(index)} tabIndex={index}>
+                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
+                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
+                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
+                          </div>
+                          {isMenuOpen && activeAlumniIndex === index && (
+                            <ul tabIndex={index} className="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+                              <li><button onClick={handleDeleteAlumni(alum._id)} className="block w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden">Delete</button></li>
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <p>Email: {alum.Email || "N/A"}</p>
                   <p>Mobile: {alum.MobileNumber || "N/A"}</p>
                   <p>Company: {alum.company || "N/A"}</p>
@@ -122,17 +152,6 @@ const Alumni = () => {
                     >
                       LinkedIn Profile
                     </a>
-                  )}
-                  {authUser?.role == "admin" && (
-                    <p>
-                      <button 
-                        type="button"
-                        onClick={handleDeleteAlumni(alum._id)}
-                        className="bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-700 hover:to-red-800 focus:outline-none transition w-full md:w-1/2"
-                      >
-                        Delete Alumni
-                      </button>
-                    </p>
                   )}
                 </div>
               ))}
