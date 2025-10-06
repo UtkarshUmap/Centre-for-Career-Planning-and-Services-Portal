@@ -3,14 +3,19 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import useGetAlumni from "../../api/alumni/useGetAlumni";
 import useGetAllAlumni from "../../api/alumni/useGetAllAlumni";
+import { useAuthContext } from '../../context/AuthContext';
+import useAlumniAdmin from "../../api/alumni/useAlumniAdmin";
+import toast from "react-hot-toast";
 
 const Alumni = () => {
+  const { authUser } = useAuthContext();
   const [search, setSearch] = useState("");
   const [searchType, setSearchType] = useState("company");
   const [alumniList, setAlumniList] = useState([]);
 
   const { loading: loadingAll, alumni } = useGetAllAlumni();
   const { loading: loadingSearch, getAlumni } = useGetAlumni();
+  const { deleteAlumni } = useAlumniAdmin();
 
   useEffect(() => {
     setAlumniList(alumni);
@@ -25,6 +30,19 @@ const Alumni = () => {
     setSearch("");
     setSearchType("company");
     setAlumniList(alumni);
+  };
+
+  const handleDeleteAlumni = (id) => async () => {
+    const token = localStorage.getItem("ccps-token");
+    if (!id) return;
+    if (window.confirm("Are you sure you want to delete this alumni?")) {
+      try {
+        await deleteAlumni(id, token);
+        setAlumniList((prev) => prev.filter((alum) => alum._id !== id));
+      } catch (error) {
+        toast.error("Failed to delete alumni");
+      }
+    }
   };
 
   const labelMap = {
@@ -104,6 +122,17 @@ const Alumni = () => {
                     >
                       LinkedIn Profile
                     </a>
+                  )}
+                  {authUser?.role == "admin" && (
+                    <p>
+                      <button 
+                        type="button"
+                        onClick={handleDeleteAlumni(alum._id)}
+                        className="bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-700 hover:to-red-800 focus:outline-none transition w-full md:w-1/2"
+                      >
+                        Delete Alumni
+                      </button>
+                    </p>
                   )}
                 </div>
               ))}
