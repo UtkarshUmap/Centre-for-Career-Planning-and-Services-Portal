@@ -1,4 +1,5 @@
 import JobPosting from '../models/jobPosting.model.js';
+import mongoose from 'mongoose';
 
 export const jobCreate = async (req, res) => {
     try {
@@ -113,32 +114,51 @@ export const jobList = async (req, res) => {
     }
 };
 
+
+// Helper function to check ObjectId validity
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// Upvote a job posting
 export const jobRelevanceScoreUpvote = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.body.userId; // user ID from request
 
-        // Find the job posting by ID
-        const jobPosting = await JobPosting.findById(id);
-
-        if (!jobPosting) {
-            return res.status(404).json({
-                message: 'Job posting not found'
-            });
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Increment the relevanceScore by 1
-        jobPosting.relevanceScore += 1;
+        const jobPosting = await JobPosting.findById(id);
+        if (!jobPosting) {
+            return res.status(404).json({ message: 'Job posting not found' });
+        }
 
-        // Save the updated job posting
+        if (jobPosting.upvotedBy.includes(userId)) {
+            return res.status(400).json({ message: 'Already upvoted' });
+        }
+
+        // Switch vote if previously downvoted
+        if (jobPosting.downvotedBy.includes(userId)) {
+            jobPosting.downvotedBy.pull(userId);
+            jobPosting.upvotedBy.push(userId);
+            jobPosting.relevanceScore += 2;
+        } else {
+            // Normal upvote
+            jobPosting.upvotedBy.push(userId);
+            jobPosting.relevanceScore += 1;
+        }
+
         await jobPosting.save();
 
-        // Send a success response
         res.status(200).json({
             message: 'Relevance score upvoted successfully',
-            job: jobPosting
+            job: jobPosting,
+            userVote: {
+                upvoted: true,
+                downvoted: false
+            }
         });
     } catch (error) {
-        // Send an error response if something goes wrong
         res.status(500).json({
             message: 'Error updating relevance score',
             error: error.message
@@ -146,36 +166,51 @@ export const jobRelevanceScoreUpvote = async (req, res) => {
     }
 };
 
-
+// Downvote a job posting
 export const jobRelevanceScoreDownvote = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.body.userId; // user ID from request
 
-        // Find the job posting by ID
-        const jobPosting = await JobPosting.findById(id);
-
-        if (!jobPosting) {
-            return res.status(404).json({
-                message: 'Job posting not found'
-            });
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
         }
 
-        // Decrement the relevanceScore by 1
-        jobPosting.relevanceScore -= 1;
+        const jobPosting = await JobPosting.findById(id);
+        if (!jobPosting) {
+            return res.status(404).json({ message: 'Job posting not found' });
+        }
 
-        // Save the updated job posting
+        if (jobPosting.downvotedBy.includes(userId)) {
+            return res.status(400).json({ message: 'Already downvoted' });
+        }
+
+        // Switch vote if previously upvoted
+        if (jobPosting.upvotedBy.includes(userId)) {
+            jobPosting.upvotedBy.pull(userId);
+            jobPosting.downvotedBy.push(userId);
+            jobPosting.relevanceScore -= 2;
+        } else {
+            // Normal downvote
+            jobPosting.downvotedBy.push(userId);
+            jobPosting.relevanceScore -= 1;
+        }
+
         await jobPosting.save();
 
-        // Send a success response
         res.status(200).json({
             message: 'Relevance score downvoted successfully',
-            job: jobPosting
+            job: jobPosting,
+            userVote: {
+                upvoted: false,
+                downvoted: true
+            }
         });
     } catch (error) {
-        // Send an error response if something goes wrong
         res.status(500).json({
             message: 'Error updating relevance score',
             error: error.message
         });
     }
 };
+
