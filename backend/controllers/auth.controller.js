@@ -12,24 +12,41 @@ export const signup = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        if (!email.endsWith('@iitbhilai.ac.in')) {
-            return res.status(400).json({ success: false, message: 'Only IIT Bhilai emails are allowed' });
+        if (role === "student" || role === "admin") {
+            if (!email.endsWith("@iitbhilai.ac.in")) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Only IIT Bhilai emails are allowed',
+                });
+            }
+        } else if (role === "recruiter") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid email format"
+                });
+            }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid role specified. Must be 'student', 'admin', or 'recruiter'."
+            });
         }
-
         const user = await User.findOne({ email });
         const verificationToken = Math.floor(100000 + (Math.random() * 900000)).toString();
 
         if (user) {
-            if(user.isVerified){
+            if (user.isVerified) {
                 return res.status(400).json({ success: false, message: "User already exists" });
             }
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
-            user.name = name; 
+            user.name = name;
             user.password = hashedPassword;
             user.verificationToken = verificationToken;
-            user.verificationTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; 
+            user.verificationTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000;
 
             await user.save();
             await sendVerificationEmail(user.email, verificationToken);
@@ -210,7 +227,7 @@ export const forgotPassword = async (req, res) => {
 
         const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
         // console.log(user.email),
-        await sendPasswordResetEmail( user.email, resetURL);
+        await sendPasswordResetEmail(user.email, resetURL);
 
         res.status(200).json({ success: true, message: "Password reset link sent to your email" });
 

@@ -42,7 +42,7 @@ export const applyToJob = async (req, res) => {
     const studentId = req.userId;
     const { jobId, resume, phone, address } = req.body;
 
-    // if (
+     // if (
     //   !jobId ||
     //   !resume ||
     //   !phone ||
@@ -150,3 +150,44 @@ export const getJobApplications = async (req, res) => {
     });
   }
 };
+
+export const getAppliedJobs = async (req, res) => {
+  try {
+    const studentId = req.userId;
+    
+    const appliedApplications = await JobApplication.find({
+      studentId: studentId,
+      status: "applied" 
+    })
+      .select("jobId status")
+      .populate({
+        path: "jobId",
+        model: "JobPosting"
+      });
+
+    const appliedJobs = appliedApplications
+      .filter(app => app.jobId)
+      .map(app => {
+        return {
+          ...app.jobId.toObject(),
+          applicationStatus: app.status,
+          applicationId: app._id
+        };
+      });
+
+    res.status(200).json({
+      success: true,
+      appliedJobs: appliedJobs
+    });
+
+  } catch (err) {
+    console.error("Error getAppliedJobs:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch applied jobs",
+      error: err.message
+    });
+  }
+};
+
+

@@ -34,7 +34,7 @@ export const fetchJobs = async (token) => {
         // Throws a more informative error. Your `JobManagementPage.jsx` catches this.
         throw new Error(errorData.message || `Failed to fetch jobs (Status: ${response.status})`);
     }
-    
+
     // Assuming your jobList controller returns an object like { message: ..., jobs: [...] }
     return response.json();
 };
@@ -55,12 +55,10 @@ export const deleteJob = async (jobId, token) => {
             'Authorization': `Bearer ${token}`, 
         },
     });
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
         throw new Error(errorData.message || `Failed to delete job (Status: ${response.status})`);
     }
-
     return response.json();
 };
 

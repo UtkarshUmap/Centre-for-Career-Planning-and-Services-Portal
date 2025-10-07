@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import apiRouter from "./routes/index.router.js";
-
 dotenv.config();
 
 const port = process.env.PORT || 3000;
@@ -31,3 +30,4 @@ app.listen(port, () => {
   connectDB();
   console.log(`Server is running at port ${port}`);
 });
+
