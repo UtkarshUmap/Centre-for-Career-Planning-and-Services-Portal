@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import Sidebar from "../../components/Sidebar";
 import useGetAlumni from "../../api/alumni/useGetAlumni";
@@ -6,6 +6,7 @@ import useGetAllAlumni from "../../api/alumni/useGetAllAlumni";
 import { useAuthContext } from '../../context/AuthContext';
 import useAlumniAdmin from "../../api/alumni/useAlumniAdmin";
 import toast from "react-hot-toast";
+import { useMenuClose } from "../../utils/closeMenuEffect";
 
 const Alumni = () => {
   const { authUser } = useAuthContext();
@@ -14,6 +15,7 @@ const Alumni = () => {
   const [alumniList, setAlumniList] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeAlumniIndex, setActiveAlumniIndex] = useState(-1);
+  const contextMenuRef = useRef(null);
 
   const { loading: loadingAll, alumni } = useGetAllAlumni();
   const { loading: loadingSearch, getAlumni } = useGetAlumni();
@@ -35,9 +37,14 @@ const Alumni = () => {
   };
 
   const handleContextMenuToggle = (index) => {
-    setIsMenuOpen(!isMenuOpen);
-    setActiveAlumniIndex(isMenuOpen ? -1 : index);
+    setIsMenuOpen((prev) => !prev || activeAlumniIndex !== index);
+    setActiveAlumniIndex((prev) => (prev === index ? -1 : index));
   };
+
+  useMenuClose(contextMenuRef, () => {
+    setIsMenuOpen(false);
+    setActiveAlumniIndex(-1);
+  });
 
   const handleDeleteAlumni = (id) => async () => {
     const token = localStorage.getItem("ccps-token");
@@ -47,11 +54,13 @@ const Alumni = () => {
         await deleteAlumni(id, token);
         setAlumniList((prev) => prev.filter((alum) => alum._id !== id));
         setIsMenuOpen(false);
+        setActiveAlumniIndex(-1);
       } catch (error) {
         toast.error("Failed to delete alumni");
       }
     } else {
       setIsMenuOpen(false);
+      setActiveAlumniIndex(-1);
     }
   };
 
@@ -122,7 +131,7 @@ const Alumni = () => {
                       <h3 className="text-xl font-semibold text-[#13665b]">{alum.name}</h3>
                     </div>
                     {authUser?.role == "admin" && (
-                      <div className="col-span-2 col-end-7">
+                      <div className="col-span-2 col-end-7" ref={contextMenuRef}>
                         <div className="relative">
                           <div className="flex flex-col space-y-1" role="button" onClick={() => handleContextMenuToggle(index)} tabIndex={index}>
                             <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
