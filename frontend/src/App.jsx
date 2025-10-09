@@ -12,6 +12,7 @@ import Signup from './pages/auth/Signup';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import TokenValidator from './pages/auth/TokenValidator';
 
 // Student Pages Import
 import Alumni from './pages/student/Alumni';
@@ -45,6 +46,7 @@ function App() {
       {showForgotPassword && <ForgotPassword />}
       {showVerifyEmail && <VerifyEmail />}
       {showAddThread && <AddThread />}
+      <TokenValidator />
 
 
       <Routes>
