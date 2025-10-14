@@ -6,6 +6,8 @@ import useGetAllAlumni from "../../api/alumni/useGetAllAlumni";
 import { useAuthContext } from '../../context/AuthContext';
 import AddEditAlumniModal from "../../components/AddEditAlumniModal";
 import AlumniCard from "../../components/AlumniCard";
+import useAlumniAdmin from "../../api/alumni/useAlumniAdmin";
+import toast from "react-hot-toast";
 
 const Alumni = () => {
   const { authUser } = useAuthContext();
@@ -17,6 +19,7 @@ const Alumni = () => {
 
   const { loading: loadingAll, alumni } = useGetAllAlumni();
   const { loading: loadingSearch, getAlumni } = useGetAlumni();
+  const { deleteAlumni } = useAlumniAdmin();
 
   useEffect(() => {
     setAlumniList(alumni);
@@ -40,6 +43,19 @@ const Alumni = () => {
     }
   };
 
+  const handleDeleteAlumni = (id) => async () => {
+    const token = localStorage.getItem("ccps-token");
+    if (!id) return;
+    if (window.confirm("Are you sure you want to delete this alumni?")) {
+      try {
+        await deleteAlumni(id, token);
+        setAlumniList(alumniList.filter((a) => a._id !== id));
+      } catch (error) {
+        toast.error("Failed to delete alumni");
+      }
+    }
+  }
+
   const openAddEditModal = (alumni) => {
     setSelectedAlumni(alumni);
     setIsModalOpen(true);
@@ -49,6 +65,24 @@ const Alumni = () => {
     setIsModalOpen(false);
     setSelectedAlumni(null);
   };
+
+  const onAddNewAlumni = (newAlumni) => {
+    // Add the new alumni to the list
+    setAlumniList([...alumniList, newAlumni]);
+    setIsModalOpen(false);
+  };
+
+  const onUpdateExistingAlumni = (updatedAlumni) => {
+    // Update the alumni in the list
+    setAlumniList(alumniList.map((a) => (a._id === updatedAlumni._id ? { ...a, ...updatedAlumni } : a)));
+    setIsModalOpen(false);
+  };
+
+  const onDeleteExistingAlumni = (id) => {
+    // Remove the alumni from the list
+    setAlumniList(alumniList.filter((a) => a._id !== id));
+    setIsModalOpen(false);
+  }
 
   const labelMap = {
     company: "Company Name",
@@ -122,6 +156,7 @@ const Alumni = () => {
                   index={index} 
                   authUser={authUser}
                   onEditAlumni={handleEditAlumni(alum._id)}
+                  onDeleteAlumni={handleDeleteAlumni(alum._id)}
                   />
               ))}
             </div>
@@ -134,7 +169,9 @@ const Alumni = () => {
         <AddEditAlumniModal
           alumni={selectedAlumni}
           alumniList={alumniList}
-          setAlumniList={setAlumniList}
+          onAddAlumni={onAddNewAlumni}
+          onUpdateAlumni={onUpdateExistingAlumni}
+          onDeleteAlumni={onDeleteExistingAlumni}
           onClose={closeAddEditModal}
         />
       )}

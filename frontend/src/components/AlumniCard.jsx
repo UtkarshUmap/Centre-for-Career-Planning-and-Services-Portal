@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useMenuClose } from "../utils/closeMenuEffect";
 
-function AlumniCard({ alum, index, authUser, onEditAlumni }) {
+function AlumniCard({ alum, index, authUser, onEditAlumni, onDeleteAlumni }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -9,8 +9,13 @@ function AlumniCard({ alum, index, authUser, onEditAlumni }) {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleEditAlumni = () => {
-    onEditAlumni();
+  const handleEditAlumni = (id) => {
+    onEditAlumni(id);
+    setIsMenuOpen(false);
+  };
+
+  const handleDeleteAlumni = (id) => {
+    onDeleteAlumni(id);
     setIsMenuOpen(false);
   };
 
@@ -38,6 +43,7 @@ function AlumniCard({ alum, index, authUser, onEditAlumni }) {
             {isMenuOpen && (
               <ul tabIndex={index} className="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
                 <li><button onClick={handleEditAlumni} className="block w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden">Edit</button></li>
+                <li><button onClick={handleDeleteAlumni} className="block w-full px-4 py-2 text-center text-sm text-red-600 hover:bg-gray-100 focus:outline-hidden">Delete</button></li>
               </ul>
             )}
           </div>

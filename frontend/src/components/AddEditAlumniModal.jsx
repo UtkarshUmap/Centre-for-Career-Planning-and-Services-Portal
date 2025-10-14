@@ -14,7 +14,7 @@ const initialForm = {
   jobs: [{ id: "", role: "" }],
 };
 
-const AddEditAlumniModal = ({ alumni, alumniList, setAlumniList, onClose }) => {
+const AddEditAlumniModal = ({ alumni, alumniList, onAddAlumni, onUpdateAlumni, onDeleteAlumni, onClose }) => {
   const { addAlumni, updateAlumni, deleteAlumni } = useAlumniAdmin();
 
   const [searchId, setSearchId] = useState("");
@@ -79,11 +79,13 @@ const AddEditAlumniModal = ({ alumni, alumniList, setAlumniList, onClose }) => {
     const token = localStorage.getItem("ccps-token");
     try {
       if (isEditMode && editingId) {
+        console.log("Updating alumni:", editingId, form);
         await updateAlumni(editingId, form, token);
-        setAlumniList(alumniList.map((a) => (a._id === editingId ? { ...a, ...form } : a)));
+        onUpdateAlumni({...form, _id: editingId});
       } else {
+        console.log("Adding new alumni:", form);
         await addAlumni(form, token);
-        setAlumniList([...alumniList, form]);
+        onAddAlumni(form);
       }
       resetForm();
       onClose();
@@ -100,7 +102,7 @@ const AddEditAlumniModal = ({ alumni, alumniList, setAlumniList, onClose }) => {
       try {
         await deleteAlumni(editingId, token);
         resetForm();
-        setAlumniList(alumniList.filter((a) => a._id !== editingId));
+        onDeleteAlumni(editingId);
         onClose();
       } catch (error) {
         console.error(err);
