@@ -39,7 +39,6 @@ export const createThread = async (req, res) => {
         });
 
         await newThread.save();
-        // todo: real time functionality using socket.io
 
         res.status(201).json({ success: true, newThread });
 
@@ -90,56 +89,44 @@ export const createComment = async (req, res) => {
     }
 }
 
-export const upvote = async (req, res) => {
+export const handleVote = async (req, res) => {
     try {
         const { threadId } = req.params;
-        const userId = req.userId;
+        const userId = req.userId; // User who is voting
+        const { voteType } = req.body; // 'upvote' or 'downvote' from the frontend
 
         const thread = await Thread.findById(threadId);
         if (!thread) {
             return res.status(404).json({ success: false, message: "Thread not found" });
         }
 
-        if (thread.upvotes.includes(userId)) {
-            thread.upvotes.pull(userId);
+        if (voteType === 'upvote') {
+            if (thread.upvotes.includes(userId)) {
+                thread.upvotes.pull(userId); // Undo upvote
+            } else {
+                thread.upvotes.push(userId); // Apply upvote
+                thread.downvotes.pull(userId); // Remove downvote if it existed
+            }
+        } 
+        
+        else if (voteType === 'downvote') {
+            if (thread.downvotes.includes(userId)) {
+                thread.downvotes.pull(userId); // Undo downvote
+            } else {
+                thread.downvotes.push(userId); // Apply downvote
+                thread.upvotes.pull(userId); // Remove upvote if it existed
+            }
         } else {
-            thread.upvotes.push(userId);
-            thread.downvotes.pull(userId);
+            return res.status(400).json({ success: false, message: "Invalid vote type" });
         }
 
+        // Save the updated thread
         await thread.save();
 
-        res.status(200).json({ success: true, thread });
+        res.status(200).json({ success: true, updatedThread: thread });
 
     } catch (e) {
-        console.log("error in upvote controller", e.message);
-        res.status(500).json({ success: false, error: "Server Error" });
-    }
-}
-
-export const downvote = async (req, res) => {
-    try {
-        const { threadId } = req.params;
-        const userId = req.userId;
-
-        const thread = await Thread.findById(threadId);
-        if (!thread) {
-            return res.status(404).json({ success: false, message: "Thread not found" });
-        }
-
-        if (thread.downvotes.includes(userId)) {
-            thread.downvotes.pull(userId);
-        } else {
-            thread.downvotes.push(userId);
-            thread.upvotes.pull(userId);
-        }
-
-        await thread.save();
-
-        res.status(200).json({ success: true, thread });
-
-    } catch (e) {
-        console.log("error in downvote controller", e.message);
+        console.log("error in handleVote controller", e.message);
         res.status(500).json({ success: false, error: "Server Error" });
     }
 }

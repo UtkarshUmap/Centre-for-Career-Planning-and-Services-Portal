@@ -15,6 +15,7 @@ const useThreadStore = () => {
     const [loading, setLoading] = useState(false);
     const [threads, setThreads] = useState([]);
     const { backendUrl } = useAppContext();
+    const token = localStorage.getItem('ccps-token');
 
     const getThreads = async () => {
         setLoading(true);
@@ -23,7 +24,7 @@ const useThreadStore = () => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('ccps-token')}`
+                    'Authorization': `Bearer ${token}`
                 }
             });
             const data = await res.json();
@@ -52,7 +53,7 @@ const useThreadStore = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('ccps-token')}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(threadData)
             });
@@ -67,10 +68,11 @@ const useThreadStore = () => {
                 throw new Error(data.message || "Unknown error");
             }
 
-            setThreads([...threads, data.newThread]);
+            setThreads((prevThreads) => [data.newThread, ...prevThreads]); 
+            toast.success("Thread created!");
             return true;
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error creating thread:", error);
             toast.error(error.message);
             return false;
         } finally {
@@ -92,7 +94,7 @@ const useThreadStore = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('ccps-token')}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(commentData)
             });
@@ -106,19 +108,12 @@ const useThreadStore = () => {
             if (!data.success) {
                 throw new Error(data.message || "Unknown error");
             }
-
-            // setThreads((prevThreads) =>
-            //     prevThreads.map((t) =>
-            //         t._id === commentData.threadId
-            //             ? { ...t, comments: [...t.comments, data.newComment] }
-            //             : t
-            //     )
-            // );
-            getThreads();
-
+            
+            // Re-fetch threads to update comments list
+            toast.success("Comment added!");
             return true;
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error creating comment:", error);
             toast.error(error.message);
             return false;
         } finally {
@@ -126,8 +121,57 @@ const useThreadStore = () => {
         }
     };
 
+    // 🎯 handleThreadVote function: Uses PUT and sends voteType in the body
+    const handleThreadVote = async (threadId, voteType) => {
+        try {
+            // ✅ URI is now /api/threads/vote/:threadId
+            const res = await fetch(`${backendUrl}/api/threads/vote/${threadId}`, { 
+                method: 'PUT', // ✅ Method is PUT
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ voteType }) // ✅ Sends { voteType: 'upvote' | 'downvote' }
+            });
 
-    return { loading, threads, getThreads, createThread, createComment };
+            // ⚠️ DEFENSIVE CHECK: Handle non-JSON response from 404/500
+            let data = {};
+            if (res.ok) {
+                data = await res.json();
+            } else {
+                try {
+                    data = await res.json();
+                } catch (e) {
+                    // Fallback for HTML error pages (the 404 issue)
+                    throw new Error(data.message || `Server error (Status: ${res.status}). Route not found on server.`); 
+                }
+            }
+
+            if (!res.ok) {
+                throw new Error(data.message || res.statusText); 
+            }
+
+            // Assumes backend returns { updatedThread: {...} }
+            return data.updatedThread; 
+
+        } catch (error) {
+            // Re-throw so Thread.jsx can catch and display the toast
+            console.error("Error voting on thread:", error);
+            throw error; 
+        }
+    };
+
+
+    // 🚀 EXPORT: Ensure handleThreadVote is returned
+    return { 
+        loading, 
+        threads, 
+        getThreads, 
+        setThreads, 
+        createThread, 
+        createComment, 
+        handleThreadVote 
+    };
 }
 
 function handleInputError({ title, text }) {
@@ -150,4 +194,4 @@ function handleInputError1({ text, file, threadId }) {
     return true;
 }
 
-export default useThreadStore;
+export default useThreadStore; 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getThreads, createThread, createComment, upvote, downvote } from '../controllers/thread.controller.js';
+import { getThreads, createThread, createComment, handleVote } from '../controllers/thread.controller.js';
 import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -9,8 +9,7 @@ router.post("/createThread", protectRoute, createThread);
 
 router.post("/createComment/:threadId", protectRoute, createComment);
 
-router.post("/upvote/:threadId", protectRoute, upvote);
-router.post("/downvote/:threadId", protectRoute, downvote);
+router.put("/vote/:threadId", protectRoute, handleVote);
 
 
 export default router;
