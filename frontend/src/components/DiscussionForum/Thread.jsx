@@ -9,7 +9,6 @@ const Thread = ({ thread, onVoteSuccess }) => {
     const { authUser } = useAuthContext()
     const currentUserId = authUser?._id
 
-    // ✅ Keep a local copy of the thread for instant UI updates
     const [localThread, setLocalThread] = useState(thread)
     const [showComments, setShowComments] = useState(false)
     const [newComment, setNewComment] = useState("")
@@ -22,7 +21,6 @@ const Thread = ({ thread, onVoteSuccess }) => {
     const isUpvoted = localThread.upvotes?.includes(currentUserId)
     const isDownvoted = localThread.downvotes?.includes(currentUserId)
 
-    // ✅ Optimistic voting update
     const handleVote = async (type) => {
         if (!currentUserId || voteLoading) return
         setVoteLoading(true)
@@ -46,13 +44,10 @@ const Thread = ({ thread, onVoteSuccess }) => {
                 }
             }
 
-            // ✅ Update UI instantly
             setLocalThread(updatedThread)
 
-            // ✅ Send request to backend
             const res = await handleThreadVote(thread._id, type)
             if (res?.updatedThread) {
-                // Sync with backend version (in case of any difference)
                 setLocalThread(res.updatedThread)
                 if (typeof onVoteSuccess === 'function') onVoteSuccess(res.updatedThread)
             }
@@ -94,7 +89,7 @@ const Thread = ({ thread, onVoteSuccess }) => {
 
     return (
         <div className="bg-white rounded-lg p-4 min-h-[210px] flex gap-4 shadow border border-gray-200 hover:shadow-md transition duration-150">
-            {/* 🗳️ Voting Section (Left, aligned with Show Comments) */}
+
             <div className="flex flex-col items-center justify-start w-10 mt-auto mb-1">
                 <div className="flex items-center gap-1">
                     <button

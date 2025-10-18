@@ -120,21 +120,17 @@ const useThreadStore = () => {
             setLoading(false);
         }
     };
-
-    // 🎯 handleThreadVote function: Uses PUT and sends voteType in the body
     const handleThreadVote = async (threadId, voteType) => {
         try {
-            // ✅ URI is now /api/threads/vote/:threadId
             const res = await fetch(`${backendUrl}/api/threads/vote/${threadId}`, { 
                 method: 'PUT', // ✅ Method is PUT
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ voteType }) // ✅ Sends { voteType: 'upvote' | 'downvote' }
+                body: JSON.stringify({ voteType }) 
             });
 
-            // ⚠️ DEFENSIVE CHECK: Handle non-JSON response from 404/500
             let data = {};
             if (res.ok) {
                 data = await res.json();
@@ -151,7 +147,6 @@ const useThreadStore = () => {
                 throw new Error(data.message || res.statusText); 
             }
 
-            // Assumes backend returns { updatedThread: {...} }
             return data.updatedThread; 
 
         } catch (error) {
