@@ -28,6 +28,18 @@ const userSchema = new mongoose.Schema({
     resetPasswordTokenExpiresAt: Date,
     verificationToken: String,
     verificationTokenExpiresAt: Date,
+    resumeUrl: {
+        type: String,
+        default: ''
+    },
+    phone: {
+        type: String,
+        default: ''
+    },
+    address: {
+        type: String,
+        default: ''
+    }
 })
 
 const User = mongoose.model("User",userSchema);

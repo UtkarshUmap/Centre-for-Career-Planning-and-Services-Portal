@@ -1,48 +1,55 @@
 import mongoose from "mongoose";
 
 const jobPostingSchema = new mongoose.Schema({
-    jobTitle:{
+    jobTitle: {
         type: String,
         required: true
     },
-    jobDescription:{
+    jobDescription: {
         type: String,
         required: true,
-    }, 
-    Company:{
-        type:String,
-        required : true,
     },
-    requiredSkills:[{
-        type:String,
+    Company: {
+        type: String,
+        required: true,
+    },
+    requiredSkills: [{
+        type: String,
     }],
-    Type:{
-        type:String,
-        required:true,
-        enum:["on-campus","off-campus"]
+    Type: {
+        type: String,
+        required: true,
+        enum: ["on-campus", "off-campus"]
     },
-    batch:{
-        type:Number,
-        required:true,
+    batch: {
+        type: Number,
+        required: true,
     },
-    Deadline:{
-        type:Date,
+    Deadline: {
+        type: Date,
     },
-    ApplicationLink:{
-        type:String,
+    ApplicationLink: {
+        type: String,
     },
-    Expiry:{
-        type:Date,
+    Expiry: {
+        type: Date,
     },
-    author:{
-        type:String,
+    author: {
+        type: String,
     },
-    relevanceScore:{
-        type:Number,
-    }
+    relevanceScore: {
+        type: Number,
+    },
+    upvotedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    downvotedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }]
+}); 
 
-})
-
-const JobPosting = mongoose.model("JobPosting",jobPostingSchema);
+const JobPosting = mongoose.model("JobPosting", jobPostingSchema);
 
 export default JobPosting;

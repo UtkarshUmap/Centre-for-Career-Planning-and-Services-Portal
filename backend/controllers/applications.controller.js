@@ -1,5 +1,6 @@
 import JobApplication from "../models/JobApplication.model.js";
 import JobPosting from "../models/jobPosting.model.js";
+import User from "../models/user.model.js";
 
 export const getStudentApplications = async (req, res) => {
   try {
@@ -41,6 +42,17 @@ export const applyToJob = async (req, res) => {
     const studentId = req.userId;
     const { jobId, resume, phone, address } = req.body;
 
+     // if (
+    //   !jobId ||
+    //   !resume ||
+    //   !phone ||
+    //   !address
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "All fields required" });
+    // }
+
     const job = await JobPosting.findById(jobId);
     if (!job) {
       return res
@@ -55,12 +67,27 @@ export const applyToJob = async (req, res) => {
         .json({ success: false, message: "Already applied" });
     }
 
+    // Check if user exists
+    const user = await User.findById(studentId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resumeUrl = resume || user.resumeUrl;
+    const phoneNumber = phone || user.phone;
+    const userAddress = address || user.address;
+
+    if (resumeUrl) user.resumeUrl = resumeUrl;
+    if (phoneNumber) user.phone = phoneNumber;
+    if (userAddress) user.address = userAddress;
+    await user.save();
+
     const application = new JobApplication({
       studentId,
       jobId,
-      resume,
-      phone,
-      address,
+      resumeUrl,
+      phoneNumber,
+      userAddress,
       status: "applied"
     });
     await application.save();
@@ -162,4 +189,5 @@ export const getAppliedJobs = async (req, res) => {
     });
   }
 };
+
 

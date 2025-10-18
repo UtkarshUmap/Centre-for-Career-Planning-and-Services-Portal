@@ -1,9 +1,13 @@
 const BACKEND_ROOT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const BASE_URL = BACKEND_ROOT.endsWith('/api')
     ? BACKEND_ROOT
     : BACKEND_ROOT.replace(/\/$/, '') + '/api';
 
+// 🟢 CRITICAL FIX: Define the specific resource endpoint.
+// Assuming your Express app uses: app.use('/api/jobs', jobRoutes)
 const JOBS_ENDPOINT = `${BASE_URL}/jobs`; 
+
 
 export { JOBS_ENDPOINT }; 
 
@@ -36,7 +40,6 @@ export const updateJobPosting = async (jobId, jobData, token) => {
     return data.job; 
 };
 
-
 export const fetchJobs = async (token) => {
     const response = await fetch(JOBS_ENDPOINT, { 
         method: 'GET',
@@ -47,27 +50,31 @@ export const fetchJobs = async (token) => {
     });
 
     if (!response.ok) {
+        // Attempt to parse the server's error message for better debugging
         const errorData = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
         throw new Error(errorData.message || `Failed to fetch jobs (Status: ${response.status})`);
     }
+
+    // Assuming your jobList controller returns an object like { message: ..., jobs: [...] }
     return response.json();
 };
 
 export const deleteJob = async (jobId, token) => {
+    // 🔑 Use the correct endpoint for deletion: /api/jobs/:id
     const response = await fetch(`${JOBS_ENDPOINT}/${jobId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
+            // Crucial: Pass the authentication token
             'Authorization': `Bearer ${token}`, 
         },
     });
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
         throw new Error(errorData.message || `Failed to delete job (Status: ${response.status})`);
     }
 
-    return response.json(); 
+    return response.json();
 };
 
 export const createJobPosting = async (jobData, token) => {

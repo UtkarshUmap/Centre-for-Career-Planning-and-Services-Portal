@@ -89,6 +89,8 @@ export const getStudentProfile = async (req, res) => {
       cgpa: student?.CGPA || "",
       imageUrl:student?.profilePhotoURL || "",
       resumeUrl:student?.resumeLink || "",
+      phone: user.phone || "",
+      address: user.address || "",
     };
 
     return res.json(profile);
@@ -102,7 +104,7 @@ export const getStudentProfile = async (req, res) => {
 export const updateStudentProfile = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { name, email, discipline, program, cgpa,imageUrl,resumeUrl } = req.body;
+    const { name, email, discipline, program, cgpa, imageUrl, resumeUrl, phoneNumber, address } = req.body;
 
     const student = await Student.findOne({ ReferenceObject: userId });
     if (!student) {  
@@ -117,6 +119,9 @@ export const updateStudentProfile = async (req, res) => {
     // Update User fields
     if (name) user.name = name;
     if (email) user.email = email;
+    if (resumeUrl) user.resumeUrl = resumeUrl;
+    if (phoneNumber) user.phone = phoneNumber;
+    if (address) user.address = address;
     await user.save();
 
     // Update Student fields
