@@ -4,7 +4,7 @@ import { useAuthContext } from '../../context/AuthContext'
 import Comment from '../Comment'
 import toast from 'react-hot-toast'
 
-const Thread = ({ thread, onVoteSuccess }) => {
+const Thread = ({ thread, onVoteSuccess, refreshThreads }) => {
     const { createComment, loading, handleThreadVote } = useThreadStore()
     const { authUser } = useAuthContext()
     const currentUserId = authUser?._id
@@ -59,6 +59,9 @@ const Thread = ({ thread, onVoteSuccess }) => {
         }
     }
 
+    useEffect(() => {
+        setLocalThread(thread)
+    }, [thread])
     const handleAddComment = async (e) => {
         e.preventDefault()
         const commentData = { text: newComment, threadId: thread._id, file }
@@ -67,6 +70,8 @@ const Thread = ({ thread, onVoteSuccess }) => {
             setNewComment("")
             setFile(null)
             setShowCommentForm(false)
+            refreshThreads()
+
             toast.success("Comment added successfully!")
         }
     }
