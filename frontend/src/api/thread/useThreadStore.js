@@ -110,6 +110,14 @@ const useThreadStore = () => {
             }
             
             // Re-fetch threads to update comments list
+                        // setThreads((prevThreads) =>
+            //     prevThreads.map((t) =>
+            //         t._id === commentData.threadId
+            //             ? { ...t, comments: [...t.comments, data.newComment] }
+            //             : t
+            //     )
+            // );
+            getThreads();
             toast.success("Comment added!");
             return true;
         } catch (error) {
