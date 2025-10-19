@@ -1,7 +1,7 @@
 // frontend/src/api/jobsApi.js
 
 // 1. Define the Backend Root URL and the Base API URL
-const BACKEND_ROOT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+const BACKEND_ROOT = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 // This logic ensures BASE_URL is the root API path, e.g., 'http://localhost:3000/api'
 const BASE_URL = BACKEND_ROOT.endsWith('/api')
@@ -11,6 +11,38 @@ const BASE_URL = BACKEND_ROOT.endsWith('/api')
 // 🟢 CRITICAL FIX: Define the specific resource endpoint.
 // Assuming your Express app uses: app.use('/api/jobs', jobRoutes)
 const JOBS_ENDPOINT = `${BASE_URL}/jobs`; 
+
+
+export { JOBS_ENDPOINT }; 
+
+export const updateJobPosting = async (jobId, jobData, token) => {
+    const response = await fetch(`${JOBS_ENDPOINT}/${jobId}`, { 
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(jobData),
+    });
+
+    // Check for 204 No Content response
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return { _id: jobId }; 
+    }
+    
+    if (!response.ok) {
+        try {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Failed to update job (Status: ${response.status})`);
+        } catch (e) {
+            throw new Error(`Failed to update job. Server returned status ${response.status} with unexpected response format.`);
+        }
+    }
+
+    const data = await response.json();
+    
+    return data.job; 
+};
 
 /**
  * Fetches the list of all job postings.
@@ -59,6 +91,7 @@ export const deleteJob = async (jobId, token) => {
         const errorData = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
         throw new Error(errorData.message || `Failed to delete job (Status: ${response.status})`);
     }
+
     return response.json();
 };
 

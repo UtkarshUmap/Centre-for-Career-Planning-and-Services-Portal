@@ -1,62 +1,79 @@
-// frontend/src/pages/JobManagementPage.jsx (CORRECTED CODE)
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchJobs, deleteJob } from "../../api/jobsApi";
 import Sidebar from "../../components/Sidebar";
-// import { useAuthContext } from "../../context/AuthContext"; // Use this if possible!
+import JobFormModal from '../../components/JobFormModal';
+import toast from "react-hot-toast";
 
 const JobManagementPage = () => {
-    // const { authUser } = useAuthContext(); 
     const [jobs, setJobs] = useState([]);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [jobToEdit, setJobToEdit] = useState(null);
 
-    // 🟢 CORRECTED TOKEN RETRIEVAL FUNCTION
-    const getAdminToken = () => {
+    const getAdminToken = useCallback(() => {
         const userString = localStorage.getItem('ccps-user');
+        const tokenFromTokenKey = localStorage.getItem('ccps-token'); 
 
         if (userString) {
             try {
                 const user = JSON.parse(userString);
-                // 💡 ASSUMPTION: The token is stored directly as a 'token' property 
-                // on the parsed user object. Adjust 'user.token' if your property is 'user.jwt', etc.
-                return user.token;
+                return user.token || user.accessToken; 
             } catch (e) {
                 console.error("Error parsing ccps-user data from localStorage:", e);
-                return null;
+                return tokenFromTokenKey;
             }
         }
-        return null;
-    };
-    // ----------------------------------------
+        return tokenFromTokenKey;
+    }, []);
+    const loadJobs = useCallback(async () => {
+        const token = getAdminToken();
+
+        if (!token) {
+            console.error('Authentication token is missing. Please log in as Admin.');
+            return;
+        }
+
+        try {
+            const data = await fetchJobs(token);
+            setJobs(data.jobs || []);
+        } catch (err) {
+            console.error('Failed to load jobs:', err.message);
+            toast.error('Failed to load jobs: ' + err.message);
+        }
+    }, [getAdminToken]);
 
     useEffect(() => {
-        const loadJobs = async () => {
-            const token = getAdminToken();
-
-            if (!token) {
-                // This is the error message you are seeing, which is now correctly displayed
-                setError('Authentication token is missing. Please log in as Admin.');
-                setLoading(false);
-                return;
-            }
-
-            try {
-                // Token is now passed, resolving the 404/401 backend issue
-                const data = await fetchJobs(token);
-                setJobs(data.jobs || []);
-            } catch (err) {
-                setError('Failed to load jobs: ' + err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
         loadJobs();
-    }, []);
+    }, [loadJobs]);
 
-    // 1. Handle Delete Function
+    const handleEditClick = (job) => {
+        setJobToEdit(job);
+        setIsFormOpen(true);
+    };
+    const handleFormClose = () => {
+        setIsFormOpen(false);
+        setJobToEdit(null); 
+    };
+    
+    const handleFormSubmitSuccess = (updatedOrCreatedJob) => {
+        if (updatedOrCreatedJob && updatedOrCreatedJob._id) {
+            setJobs(prevJobs => {
+                const index = prevJobs.findIndex(job => job._id === updatedOrCreatedJob._id);
+                
+                if (index !== -1) {
+                    return prevJobs.map(job => 
+                        job._id === updatedOrCreatedJob._id ? updatedOrCreatedJob : job
+                    );
+                } else {
+                    return [updatedOrCreatedJob, ...prevJobs];
+                }
+            });
+        }
+        
+    };
     const handleDelete = async (jobId, jobTitle) => {
         const token = getAdminToken();
         if (!token) {
-            alert('Authentication required to delete job.');
+            toast.error('Authentication required to delete job.');
             return;
         }
 
@@ -67,11 +84,11 @@ const JobManagementPage = () => {
         if (isConfirmed) {
             try {
                 await deleteJob(jobId, token);
-                setJobs(jobs.filter(job => job._id !== jobId));
-                alert(`Job "${jobTitle}" successfully deleted!`);
+                setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+                toast.success(`Job "${jobTitle}" successfully deleted!`);
             } catch (err) {
                 console.error('Deletion error:', err.message);
-                alert(`Error deleting job: ${err.message}`);
+                toast.error(`Error deleting job: ${err.message}`);
             }
         }
     };
@@ -80,18 +97,29 @@ const JobManagementPage = () => {
     return (
         <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
+
+            {/* Render the modal when isFormOpen is true */}
+            {isFormOpen && (
+                <JobFormModal 
+                    jobToEdit={jobToEdit} 
+                    // Pass the success handler that updates state directly
+                    onFormSubmitSuccess={handleFormSubmitSuccess} 
+                    onClose={handleFormClose} 
+                />
+            )}
+
             <main className="flex-1 p-6 pt-20 md:pt-8 w-full">
-                <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
                     
-                    {/* 🟢 STYLING FIX: Green Header */}
-                    <div className="bg-[#0c4a42] p-6">
-                        <h1 className="text-2xl font-bold text-white">Job Management Portal</h1>
-                        <p className="text-green-300 mt-1">Review and manage all active job postings</p>
+                    {/* Header */}
+                    <div className="bg-[#0c4a42] p-6 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">Job Management Portal</h1>
+                            <p className="text-green-300 mt-1">Review and manage all active job postings</p>
+                        </div>
                     </div>
-                    {/* --------------------------- */}
                     
                     <div className="p-6">
-                        {/* The table content moves down here */}
                         <div className="overflow-x-auto bg-white rounded-lg shadow-md">
                             {jobs.length === 0 ? (
                                 <p className="p-4 text-center text-gray-500">No jobs currently posted.</p>
@@ -109,7 +137,14 @@ const JobManagementPage = () => {
                                             <tr key={job._id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.jobTitle}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.Company}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                                    <button
+                                                         // Pass the job object to handler
+                                                        onClick={() => handleEditClick(job)} 
+                                                        className="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md transition duration-150"
+                                                    >
+                                                        Edit
+                                                    </button>
                                                     <button
                                                         onClick={() => handleDelete(job._id, job.jobTitle)}
                                                         className="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md transition duration-150"
