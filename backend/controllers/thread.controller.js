@@ -39,7 +39,8 @@ export const createThread = async (req, res) => {
         });
 
         await newThread.save();
-
+        // todo: real time functionality using socket.io
+        
         res.status(201).json({ success: true, newThread });
 
     } catch (e) {
