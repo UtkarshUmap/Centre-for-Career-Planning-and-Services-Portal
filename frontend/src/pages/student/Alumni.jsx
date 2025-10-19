@@ -4,18 +4,18 @@ import Sidebar from "../../components/Sidebar";
 import useGetAlumni from "../../api/alumni/useGetAlumni";
 import useGetAllAlumni from "../../api/alumni/useGetAllAlumni";
 import { useAuthContext } from '../../context/AuthContext';
+import AddEditAlumniModal from "../../components/AddEditAlumniModal";
+import AlumniCard from "../../components/AlumniCard";
 import useAlumniAdmin from "../../api/alumni/useAlumniAdmin";
 import toast from "react-hot-toast";
-import { useMenuClose } from "../../utils/closeMenuEffect";
 
 const Alumni = () => {
   const { authUser } = useAuthContext();
   const [search, setSearch] = useState("");
   const [searchType, setSearchType] = useState("company");
   const [alumniList, setAlumniList] = useState([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeAlumniIndex, setActiveAlumniIndex] = useState(-1);
-  const contextMenuRef = useRef(null);
+  const [selectedAlumni, setSelectedAlumni] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { loading: loadingAll, alumni } = useGetAllAlumni();
   const { loading: loadingSearch, getAlumni } = useGetAlumni();
@@ -36,15 +36,12 @@ const Alumni = () => {
     setAlumniList(alumni);
   };
 
-  const handleContextMenuToggle = (index) => {
-    setIsMenuOpen((prev) => !prev || activeAlumniIndex !== index);
-    setActiveAlumniIndex((prev) => (prev === index ? -1 : index));
+  const handleEditAlumni = (id) => () => {
+    const alum = alumniList.find((a) => a._id === id);
+    if (alum) {
+      openAddEditModal(alum);
+    }
   };
-
-  useMenuClose(contextMenuRef, () => {
-    setIsMenuOpen(false);
-    setActiveAlumniIndex(-1);
-  });
 
   const handleDeleteAlumni = (id) => async () => {
     const token = localStorage.getItem("ccps-token");
@@ -52,17 +49,40 @@ const Alumni = () => {
     if (window.confirm("Are you sure you want to delete this alumni?")) {
       try {
         await deleteAlumni(id, token);
-        setAlumniList((prev) => prev.filter((alum) => alum._id !== id));
-        setIsMenuOpen(false);
-        setActiveAlumniIndex(-1);
+        setAlumniList(alumniList.filter((a) => a._id !== id));
       } catch (error) {
         toast.error("Failed to delete alumni");
       }
-    } else {
-      setIsMenuOpen(false);
-      setActiveAlumniIndex(-1);
     }
+  }
+
+  const openAddEditModal = (alumni) => {
+    setSelectedAlumni(alumni);
+    setIsModalOpen(true);
   };
+
+  const closeAddEditModal = () => {
+    setIsModalOpen(false);
+    setSelectedAlumni(null);
+  };
+
+  const onAddNewAlumni = (newAlumni) => {
+    // Add the new alumni to the list
+    setAlumniList([...alumniList, newAlumni]);
+    setIsModalOpen(false);
+  };
+
+  const onUpdateExistingAlumni = (updatedAlumni) => {
+    // Update the alumni in the list
+    setAlumniList(alumniList.map((a) => (a._id === updatedAlumni._id ? { ...a, ...updatedAlumni } : a)));
+    setIsModalOpen(false);
+  };
+
+  const onDeleteExistingAlumni = (id) => {
+    // Remove the alumni from the list
+    setAlumniList(alumniList.filter((a) => a._id !== id));
+    setIsModalOpen(false);
+  }
 
   const labelMap = {
     company: "Company Name",
@@ -115,6 +135,14 @@ const Alumni = () => {
             >
               Reset Search
             </button>
+            {authUser?.role === "admin" && (
+              <button
+                onClick={() => openAddEditModal(null)}
+                className="px-4 py-2 bg-gradient-to-r from-[#0fa18e] to-emerald-600 text-white rounded-md hover:from-[#13665b] hover:to-emerald-700"
+              >
+                + Add Alumni
+              </button>
+            )}
           </div>
 
           {(loadingAll || loadingSearch) ? (
@@ -122,47 +150,14 @@ const Alumni = () => {
           ) : alumniList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {alumniList.map((alum, index) => (
-                <div
-                  key={alum._id}
-                  className="bg-white p-6 rounded-xl shadow hover:shadow-md transition"
-                >
-                  <div className="grid grid-cols-2">
-                    <div className="col-start-1 col-end-3">
-                      <h3 className="text-xl font-semibold text-[#13665b]">{alum.name}</h3>
-                    </div>
-                    {authUser?.role == "admin" && (
-                      <div className="col-span-2 col-end-7" ref={contextMenuRef}>
-                        <div className="relative">
-                          <div className="flex flex-col space-y-1" role="button" onClick={() => handleContextMenuToggle(index)} tabIndex={index}>
-                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
-                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
-                            <span className="block w-1 h-1 bg-gray-600 rounded-full"></span>
-                          </div>
-                          {isMenuOpen && activeAlumniIndex === index && (
-                            <ul tabIndex={index} className="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                              <li><button onClick={handleDeleteAlumni(alum._id)} className="block w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden">Delete</button></li>
-                            </ul>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <p>Email: {alum.Email || "N/A"}</p>
-                  <p>Mobile: {alum.MobileNumber || "N/A"}</p>
-                  <p>Company: {alum.company || "N/A"}</p>
-                  <p>Batch: {alum.batch || "N/A"}</p>
-                  <p>Institute ID: {alum.InstituteId || "N/A"}</p>
-                  {alum.linkedin && (
-                    <a
-                      href={alum.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-teal-600  hover:underline"
-                    >
-                      LinkedIn Profile
-                    </a>
-                  )}
-                </div>
+                <AlumniCard 
+                  key={index} 
+                  alum={alum} 
+                  index={index} 
+                  authUser={authUser}
+                  onEditAlumni={handleEditAlumni(alum._id)}
+                  onDeleteAlumni={handleDeleteAlumni(alum._id)}
+                  />
               ))}
             </div>
           ) : (
@@ -170,6 +165,16 @@ const Alumni = () => {
           )}
         </div>
       </section>
+      {isModalOpen && (
+        <AddEditAlumniModal
+          alumni={selectedAlumni}
+          alumniList={alumniList}
+          onAddAlumni={onAddNewAlumni}
+          onUpdateAlumni={onUpdateExistingAlumni}
+          onDeleteAlumni={onDeleteExistingAlumni}
+          onClose={closeAddEditModal}
+        />
+      )}
     </div>
   );
 };
