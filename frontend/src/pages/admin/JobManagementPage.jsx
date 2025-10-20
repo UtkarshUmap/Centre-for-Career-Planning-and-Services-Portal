@@ -101,6 +101,7 @@ const JobManagementPage = () => {
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications Count</th>
                                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
@@ -109,6 +110,7 @@ const JobManagementPage = () => {
                                             <tr key={job._id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.jobTitle}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.Company}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.jobApplications ? job.jobApplications.length : 0}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <button
                                                         onClick={() => handleDelete(job._id, job.jobTitle)}
