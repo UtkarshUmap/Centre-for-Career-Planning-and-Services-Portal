@@ -100,7 +100,14 @@ export const jobDelete = async (req, res) => {
 
 export const jobList = async (req, res) => {
     try {
-        const jobPostings = await JobPosting.find();
+        const jobPostings = await JobPosting.aggregate([{
+            $lookup:{
+                from: "jobapplications",
+                localField: "_id",
+                foreignField: "jobId",
+                as: "jobApplications"
+            }
+        }]);
         res.status(200).json({
             message: 'Job postings retrieved successfully',
             jobs: jobPostings
